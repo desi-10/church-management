@@ -1,0 +1,183 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== MODELS ==================== //
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  
+  members   Member[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Member {
+  id         String       @id @default(cuid())
+  userId     String?
+  firstName  String
+  lastName   String?
+  email      String?  @unique
+  phone      String?      @unique
+  role       Role         @default(MEMBER)
+  address     String?
+  status      MemberStatus @default(ACTIVE)
+  user       User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  // Relations
+  finances          Finance[] @relation("MemberFinances")
+  approvedFinances  Finance[] @relation("FinanceApprovedBy")
+  attendances       Attendance[]
+
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model Attendance {
+  id         String           @id @default(cuid())
+  date       DateTime         @default(now())
+  memberId   String?
+  status     AttendanceStatus @default(PRESENT)
+  firstname  String?          // For first timers
+  lastname   String?          // For first timers
+
+  member     Member?          @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+}
+
+model Finance {
+  id           String         @id @default(cuid())
+  type         FinanceType
+  category     String?
+  description  String?
+  amount       Float
+  currency     Currency        @default(GHS)
+  paymentType  PaymentType
+  status       FinanceStatus   @default(COMPLETED)
+
+  date         DateTime        @default(now())
+  memberId     String?
+  approvedById String?
+  reference    String?        @unique
+  reconciled   Boolean         @default(false)
+  receiptUrl   String?        @unique
+  fund         String?
+  notes        String?
+
+  firstname   String?
+  lastname   String?
+
+  // Relations
+  member       Member? @relation("MemberFinances", fields: [memberId], references: [id], onDelete: SetNull)
+  approvedBy   Member? @relation("FinanceApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+
+  createdAt    DateTime @default(now())
+
+  @@index([date])
+}
+
+model Prospect {
+  id         String   @id @default(cuid())
+  firstName  String
+  lastName   String?
+  phone      String?
+  email      String?
+  invitedBy  String?  // who brought them
+  notes      String?  // discipleship notes
+  converted  Boolean  @default(false)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ScheduledSMS {
+  id          String   @id @default(cuid())
+  message     String
+  recipients  String   // JSON array of phone numbers
+  scheduledFor DateTime
+  status      SMSStatus @default(PENDING)
+  sentAt      DateTime?
+  sentCount   Int      @default(0)
+  errorMessage String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([scheduledFor])
+  @@index([status])
+}
+
+
+// ==================== ENUMS ==================== //
+
+enum Role {
+  PASTOR
+  USHER
+  LEADER
+  TREASURER
+  SECRETARY
+  DEACON
+  CHOIR
+  FINANCIAL_SECRETARY
+  MEMBER
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  BLOCKED
+}
+
+enum SMSStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum FinanceType {
+  TITHE
+  OFFERING
+  DONATION
+  EXPENSE
+  PLEDGE
+}
+
+enum PaymentType {
+  CASH
+  MOBILE_MONEY
+  BANK
+}
+
+enum FinanceStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum Currency {
+  GHS
+  USD
+  EUR
+}
+
+
