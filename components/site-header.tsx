@@ -45,6 +45,8 @@ export function SiteHeader() {
   const pageDescription =
     pageDescriptions[pathname] || "Manage your church community";
 
+  const { data: session } = authClient.useSession();
+
   const handleSignOut = async () => {
     await authClient.signOut({
       fetchOptions: {
@@ -133,9 +135,13 @@ export function SiteHeader() {
                 className="relative h-10 w-10 rounded-full hover:ring-2 hover:ring-blue-500/20 transition-all"
               >
                 <Avatar className="h-10 w-10 border-2 border-blue-100">
-                  <AvatarImage src="/avatars/admin.jpg" alt="Admin" />
+                  <AvatarImage
+                    src={session?.user?.image || "/avatars/admin.jpg"}
+                    alt="Admin"
+                  />
                   <AvatarFallback className="bg-gradient-to-br from-blue-600 to-blue-700 text-white font-bold">
-                    AD
+                    {session?.user?.name?.charAt(0) || "A"}{" "}
+                    {session?.user?.name?.split(" ")[1]?.charAt(0) || ""}
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -143,8 +149,12 @@ export function SiteHeader() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-semibold">Admin User</p>
-                  <p className="text-xs text-gray-500">admin@church.com</p>
+                  <p className="text-sm font-semibold">
+                    {session?.user?.name || "Admin"}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {session?.user?.email || "admin@church.com"}
+                  </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />

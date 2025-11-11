@@ -163,6 +163,9 @@ export default function Home() {
                   className="h-11"
                   {...register("email")}
                 />
+                {errors.email && (
+                  <p className="text-sm text-red-500">{errors.email.message}</p>
+                )}
               </div>
 
               {/* Password Field */}
@@ -180,6 +183,11 @@ export default function Home() {
                   className="h-11"
                   {...register("password")}
                 />
+                {errors.password && (
+                  <p className="text-sm text-red-500">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
 
               {/* Remember Me & Forgot Password */}

@@ -15,6 +15,20 @@ const UsersPage = () => {
       const response = await axios.get("/api/user");
       const data = response.data;
       setUsers(data);
+      // const { data: users, error } = await authClient.admin.listUsers({
+      //     query: {
+      //         searchValue: "some name",
+      //         searchField: "name",
+      //         searchOperator: "contains",
+      //         limit: 100,
+      //         offset: 100,
+      //         sortBy: "name",
+      //         sortDirection: "desc",
+      //         filterField: "email",
+      //         filterValue: "hello@example.com",
+      //         filterOperator: "eq",
+      //     },
+      // });
     };
     fetchUsers();
   }, []);

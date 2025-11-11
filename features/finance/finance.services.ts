@@ -9,6 +9,7 @@ import {
   FinanceStatus,
   Currency,
 } from "@prisma/client";
+// import { generateFinanceReference } from "./finance.util";
 
 export const getFinances = async (page: number = 1, limit: number = 10) => {
   const finances = await prisma.finance.findMany({
@@ -16,6 +17,11 @@ export const getFinances = async (page: number = 1, limit: number = 10) => {
       date: "desc",
     },
     include: {
+      approvedBy: {
+        select: {
+          name: true,
+        },
+      },
       member: {
         select: {
           firstName: true,
@@ -43,7 +49,10 @@ export const getFinances = async (page: number = 1, limit: number = 10) => {
   });
 };
 
-export const createFinance = async (financeData: TypeofFinanceData) => {
+export const createFinance = async (
+  financeData: TypeofFinanceData,
+  userId: string
+) => {
   const {
     type,
     category,
@@ -63,6 +72,18 @@ export const createFinance = async (financeData: TypeofFinanceData) => {
     notes,
   } = financeData;
 
+  const existingFinance = await prisma.finance.findFirst({
+    where: {
+      reference,
+    },
+  });
+
+  if (existingFinance) {
+    throw new ApiError(StatusCodes.CONFLICT, "Finance already exists");
+  }
+
+  console.log(userId, "user");
+
   const finance = await prisma.finance.create({
     data: {
       type: type as FinanceType,
@@ -72,15 +93,16 @@ export const createFinance = async (financeData: TypeofFinanceData) => {
       currency: (currency as Currency) || Currency.GHS,
       paymentType: paymentType as PaymentType,
       status: (status as FinanceStatus) || FinanceStatus.COMPLETED,
-      date: date ? new Date(date) : new Date(),
+      date: date ? new Date(date as string) : new Date(),
       memberId: memberId || null,
       firstname,
       lastname,
-      reference,
+      reference: reference || null,
       reconciled: reconciled || false,
       receiptUrl,
       fund,
       notes,
+      approvedById: userId,
     },
   });
 
@@ -148,7 +170,7 @@ export const updateFinance = async (
       currency: currency as Currency,
       paymentType: paymentType as PaymentType,
       status: status as FinanceStatus,
-      date: date ? new Date(date) : undefined,
+      date: date ? new Date(date as string) : undefined,
       memberId: memberId || undefined,
       firstname,
       lastname,

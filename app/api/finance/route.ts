@@ -4,6 +4,10 @@ import * as financeService from "@/features/finance/finance.services";
 import { FinanceDataSchema } from "@/validators/finance";
 import { validateRequest } from "@/utils/validator-helper";
 import { TypeofFinanceData } from "@/validators/finance";
+import { auth } from "@/auth";
+import { headers } from "next/headers";
+import { ApiError } from "@/utils/api-error";
+import { StatusCodes } from "http-status-codes";
 
 export const GET = asyncHandler(async () => {
   const result = await financeService.getFinances();
@@ -11,7 +15,21 @@ export const GET = asyncHandler(async () => {
 });
 
 export const POST = asyncHandler(async (req: Request) => {
+  const user = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!user) {
+    throw new ApiError(
+      StatusCodes.UNAUTHORIZED,
+      "You are not authorized to create a finance"
+    );
+  }
+
   const data = await validateRequest(req, FinanceDataSchema);
-  const result = await financeService.createFinance(data as TypeofFinanceData);
+  const result = await financeService.createFinance(
+    data as TypeofFinanceData,
+    user.user.id
+  );
   return NextResponse.json(result);
 });

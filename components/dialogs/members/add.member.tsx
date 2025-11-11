@@ -12,22 +12,30 @@ import { useEffect, useState } from "react";
 import { Loader2, Plus, User, Upload } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { MemberDataSchema, TypeofMemberData } from "@/validators/members";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 import Image from "next/image";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const AddMember = () => {
   const [open, setOpen] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [members, setMembers] = useState<any>(null);
-
+  const [users, setUsers] = useState<any[]>([]);
   const {
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<TypeofMemberData>({
@@ -45,6 +53,23 @@ const AddMember = () => {
       setPreview(null);
     }
   }, [imageFile]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const { data } = await axios.get("/api/user");
+        setUsers(data.data.users);
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          toast.error(error.response?.data.message);
+        } else {
+          toast.error("Something went wrong");
+        }
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const onSubmit = async (data: TypeofMemberData) => {
     try {
@@ -122,45 +147,53 @@ const AddMember = () => {
             </div>
           </div>
 
-          {/* Other Inputs */}
-          <div className="grid gap-2">
-            <Label htmlFor="firstName">First Name</Label>
-            <Input
-              type="text"
-              placeholder="First Name"
-              {...register("firstName")}
-            />
-            {errors.firstName && (
-              <p className="text-sm text-red-500">{errors.firstName.message}</p>
-            )}
+          <div className="grid grid-cols-2 gap-2">
+            {/* Other Inputs */}
+            <div className="grid gap-2">
+              <Label htmlFor="firstName">First Name</Label>
+              <Input
+                type="text"
+                placeholder="First Name"
+                {...register("firstName")}
+              />
+              {errors.firstName && (
+                <p className="text-sm text-red-500">
+                  {errors.firstName.message}
+                </p>
+              )}
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="lastName">Last Name</Label>
+              <Input
+                type="text"
+                placeholder="Last Name"
+                {...register("lastName")}
+              />
+              {errors.lastName && (
+                <p className="text-sm text-red-500">
+                  {errors.lastName.message}
+                </p>
+              )}
+            </div>
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="lastName">Last Name</Label>
-            <Input
-              type="text"
-              placeholder="Last Name"
-              {...register("lastName")}
-            />
-            {errors.lastName && (
-              <p className="text-sm text-red-500">{errors.lastName.message}</p>
-            )}
-          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input type="email" placeholder="Email" {...register("email")} />
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email.message}</p>
+              )}
+            </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input type="email" placeholder="Email" {...register("email")} />
-            {errors.email && (
-              <p className="text-sm text-red-500">{errors.email.message}</p>
-            )}
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input type="tel" placeholder="Phone" {...register("phone")} />
-            {errors.phone && (
-              <p className="text-sm text-red-500">{errors.phone.message}</p>
-            )}
+            <div className="grid gap-2">
+              <Label htmlFor="phone">Phone</Label>
+              <Input type="tel" placeholder="Phone" {...register("phone")} />
+              {errors.phone && (
+                <p className="text-sm text-red-500">{errors.phone.message}</p>
+              )}
+            </div>
           </div>
 
           <div className="grid gap-2">
@@ -169,6 +202,31 @@ const AddMember = () => {
             {errors.address && (
               <p className="text-sm text-red-500">{errors.address.message}</p>
             )}
+          </div>
+
+          <div className="col-span-2 w-full">
+            <Label htmlFor="memberId">Users (Optional)</Label>
+            <Controller
+              name="userId"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select member" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users?.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user?.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
 
           <DialogFooter>

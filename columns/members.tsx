@@ -47,7 +47,7 @@ export const columns: ColumnDef<MemberTable>[] = [
 
     cell: ({ row }) => (
       <Image
-        src={row.original.image}
+        src={row.original.image || null}
         alt="Image"
         width={40}
         height={40}

@@ -2,6 +2,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { prisma } from "./utils/db";
 import { betterAuth } from "better-auth";
+import { admin } from "better-auth/plugins";
 
 export const auth = betterAuth({
   emailAndPassword: {
@@ -18,5 +19,10 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "sqlite",
   }),
-  plugins: [nextCookies()],
+  plugins: [
+    nextCookies(),
+    admin({
+      defaultRole: "regular",
+    }),
+  ],
 });

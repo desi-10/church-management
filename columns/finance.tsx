@@ -16,13 +16,21 @@ type FinanceTable = {
   paymentType: string;
   status: string;
   date: string;
-  memberId: string;
-  approvedById: string;
   reference: string;
   reconciled: string;
   receiptUrl: string;
   fund: string;
   notes: string;
+  firstname: string;
+  lastname: string;
+  approvedBy: {
+    firstName: string;
+    lastName: string;
+  };
+  member: {
+    firstName: string;
+    lastName: string;
+  } | null;
 };
 
 export const columns: ColumnDef<FinanceTable>[] = [
@@ -55,14 +63,14 @@ export const columns: ColumnDef<FinanceTable>[] = [
     cell: ({ row }) => <div className="truncate w-44">{row.original.type}</div>,
   },
 
-  {
-    id: "category",
-    accessorKey: "category",
-    header: "Category",
-    cell: ({ row }) => (
-      <div className="truncate w-44">{row.original.category}</div>
-    ),
-  },
+  // {
+  //   id: "category",
+  //   accessorKey: "category",
+  //   header: "Category",
+  //   cell: ({ row }) => (
+  //     <div className="truncate w-44">{row.original.category}</div>
+  //   ),
+  // },
   {
     id: "currency",
     accessorKey: "currency",
@@ -98,58 +106,72 @@ export const columns: ColumnDef<FinanceTable>[] = [
     accessorKey: "memberId",
     header: "Member ID",
     cell: ({ row }) => (
-      <div className="truncate w-44">{row.original.memberId}</div>
+      <div className="truncate w-44">
+        {row.original.member?.firstName || "----"}{" "}
+        {row.original.member?.lastName || "----"}
+      </div>
+    ),
+  },
+  {
+    id: "approvedBy",
+    accessorKey: "approvedBy",
+    header: "Approved By",
+    cell: ({ row }) => (
+      <div className="truncate w-44">
+        {row.original.approvedBy?.firstName || "----"}{" "}
+        {row.original.approvedBy?.lastName || "----"}
+      </div>
+    ),
+  },
+  {
+    id: "reference",
+    accessorKey: "reference",
+    header: "Reference",
+    cell: ({ row }) => (
+      <div className="truncate w-44">{row.original.reference || "----"}</div>
+    ),
+  },
+  {
+    id: "member",
+    accessorKey: "member",
+    header: "Not a member",
+    cell: ({ row }) => (
+      <div className="truncate w-44">
+        {row.original.firstname || "----"} {row.original.lastname || "----"}
+      </div>
     ),
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const data = row.original;
-
-      return (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-blue-500 hover:bg-blue-500 hover:text-white"
-            onClick={() => {
-              const event = new CustomEvent("openFinanceDialog", {
-                detail: { mode: "view", finance: data },
-              });
-              window.dispatchEvent(event);
-            }}
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-emerald-500 hover:bg-emerald-500 hover:text-white"
-            onClick={() => {
-              const event = new CustomEvent("openFinanceDialog", {
-                detail: { mode: "edit", finance: data },
-              });
-              window.dispatchEvent(event);
-            }}
-          >
-            <Edit2 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-rose-500 hover:bg-rose-500 hover:text-white"
-            onClick={() => {
-              const event = new CustomEvent("openFinanceDialog", {
-                detail: { mode: "delete", finance: data },
-              });
-              window.dispatchEvent(event);
-            }}
-          >
-            <Trash className="h-4 w-4" />
-          </Button>
-        </div>
-      );
-    },
-    enableHiding: false,
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-blue-500 hover:bg-blue-500 hover:text-white"
+          onClick={() => {
+            const event = new CustomEvent("openFinanceDialog", {
+              detail: { mode: "view", finance: row.original },
+            });
+            window.dispatchEvent(event);
+          }}
+        >
+          <Edit2 className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-rose-500 hover:bg-rose-500 hover:text-white"
+          onClick={() => {
+            const event = new CustomEvent("openFinanceDialog", {
+              detail: { mode: "delete", finance: row.original },
+            });
+            window.dispatchEvent(event);
+          }}
+        >
+          <Trash className="h-4 w-4" />
+        </Button>
+      </div>
+    ),
   },
 ];

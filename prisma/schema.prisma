@@ -9,7 +9,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
   id            String    @id
   name          String
@@ -21,6 +20,13 @@ model User {
   sessions      Session[]
   accounts      Account[]
   members       Member[]
+
+  role       String?
+  banned     Boolean?
+  banReason  String?
+  banExpires DateTime?
+
+   approvedFinances Finance[]    @relation("FinanceApprovedBy")
 
   @@unique([email])
   @@map("user")
@@ -36,6 +42,8 @@ model Session {
   userAgent String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  impersonatedBy String?
 
   @@unique([token])
   @@map("session")
@@ -73,103 +81,101 @@ model Verification {
 
 // ==================== MODELS ==================== //
 
-
 model Member {
-  id         String       @id @default(cuid())
-  userId     String?
-  firstName  String
-  lastName   String?
-  email      String?  @unique
-  phone      String?      @unique
-  role       Role         @default(MEMBER)
-  address     String?
-  status      MemberStatus @default(ACTIVE)
-  user       User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  id               String       @id @default(cuid())
+  userId           String?
+  firstName        String
+  lastName         String?
+  email            String?      @unique
+  phone            String?      @unique
+  role             Role         @default(MEMBER)
+  address          String?
+  status           MemberStatus @default(ACTIVE)
+  user             User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
   // Relations
-  finances          Finance[] @relation("MemberFinances")
-  approvedFinances  Finance[] @relation("FinanceApprovedBy")
-  attendances       Attendance[]
+  finances         Finance[]    @relation("MemberFinances")
+ 
+  attendances      Attendance[]
 
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Attendance {
-  id         String           @id @default(cuid())
-  date       DateTime         @default(now())
-  memberId   String?
-  status     AttendanceStatus @default(PRESENT)
-  firstname  String?          // For first timers
-  lastname   String?          // For first timers
+  id        String           @id @default(cuid())
+  date      DateTime         @default(now())
+  memberId  String?
+  status    AttendanceStatus @default(PRESENT)
+  firstname String? // For first timers
+  lastname  String? // For first timers
 
-  member     Member?          @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  member Member? @relation(fields: [memberId], references: [id], onDelete: SetNull)
 
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Finance {
-  id           String         @id @default(cuid())
-  type         FinanceType
-  category     String?
-  description  String?
-  amount       Float
-  currency     Currency        @default(GHS)
-  paymentType  PaymentType
-  status       FinanceStatus   @default(COMPLETED)
+  id          String        @id @default(cuid())
+  type        FinanceType
+  category    String?
+  description String?
+  amount      Float
+  currency    Currency      @default(GHS)
+  paymentType PaymentType
+  status      FinanceStatus @default(COMPLETED)
 
-  date         DateTime        @default(now())
+  date         DateTime @default(now())
   memberId     String?
   approvedById String?
-  reference    String?        @unique
-  reconciled   Boolean         @default(false)
-  receiptUrl   String?        @unique
+  reference    String?  
+  reconciled   Boolean  @default(false)
+  receiptUrl   String?  @unique
   fund         String?
   notes        String?
 
-  firstname   String?
-  lastname   String?
+  firstname String?
+  lastname  String?
 
   // Relations
-  member       Member? @relation("MemberFinances", fields: [memberId], references: [id], onDelete: SetNull)
-  approvedBy   Member? @relation("FinanceApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  member     Member? @relation("MemberFinances", fields: [memberId], references: [id], onDelete: SetNull)
+  approvedBy User? @relation("FinanceApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([date])
 }
 
 model Prospect {
-  id         String   @id @default(cuid())
-  firstName  String
-  lastName   String?
-  phone      String?
-  email      String?
-  invitedBy  String?  // who brought them
-  notes      String?  // discipleship notes
-  converted  Boolean  @default(false)
+  id        String  @id @default(cuid())
+  firstName String
+  lastName  String?
+  phone     String?
+  email     String?
+  invitedBy String? // who brought them
+  notes     String? // discipleship notes
+  converted Boolean @default(false)
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ScheduledSMS {
-  id          String   @id @default(cuid())
-  message     String
-  recipients  String   // JSON array of phone numbers
+  id           String    @id @default(cuid())
+  message      String
+  recipients   String // JSON array of phone numbers
   scheduledFor DateTime
-  status      SMSStatus @default(PENDING)
-  sentAt      DateTime?
-  sentCount   Int      @default(0)
+  status       SMSStatus @default(PENDING)
+  sentAt       DateTime?
+  sentCount    Int       @default(0)
   errorMessage String?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([scheduledFor])
   @@index([status])
 }
-
 
 // ==================== ENUMS ==================== //
 
@@ -230,5 +236,3 @@ enum Currency {
   USD
   EUR
 }
-
-

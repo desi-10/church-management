@@ -58,7 +58,7 @@ export function SectionCards() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
         {[1, 2, 3, 4].map((i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader>

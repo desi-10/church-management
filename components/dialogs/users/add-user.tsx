@@ -36,24 +36,13 @@ const AddUser = () => {
   //   const imageFile = watch("image");
 
   const onSubmit = async (data: TypeUserData) => {
-    const { data: response } = await authClient.signUp.email(
-      {
-        name: data.name,
-        email: data.email,
-        password: "password1234",
-      },
-      {
-        onSuccess: () => {
-          toast.success(`User added successfully`);
-          setOpen(false);
-          reset();
-          setPreview(null);
-        },
-        onError: (error) => {
-          toast.error(error.error.data?.message || "Something went wrong");
-        },
-      }
-    );
+    const { data: newUser, error } = await authClient.admin.createUser({
+      email: data.email, // required
+      password: data.password, // required
+      name: data.name, // required
+      role: "user",
+      data: { customField: "customValue" },
+    });
   };
 
   return (
@@ -121,6 +110,18 @@ const AddUser = () => {
             <Input type="email" placeholder="Email" {...register("email")} />
             {errors.email && (
               <p className="text-sm text-red-500">{errors.email.message}</p>
+            )}
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              type="password"
+              placeholder="Password"
+              {...register("password")}
+            />
+            {errors.password && (
+              <p className="text-sm text-red-500">{errors.password.message}</p>
             )}
           </div>
 

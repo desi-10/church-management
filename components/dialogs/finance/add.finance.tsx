@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, Plus, Wallet } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -27,7 +27,7 @@ import { toast } from "sonner";
 
 const AddFinance = () => {
   const [open, setOpen] = useState(false);
-
+  const [members, setMembers] = useState<any[]>([]);
   const {
     register,
     handleSubmit,
@@ -38,6 +38,18 @@ const AddFinance = () => {
     resolver: zodResolver(FinanceDataSchema),
   });
 
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const { data } = await axios.get("/api/member");
+        setMembers(data.data.members);
+      } catch (error) {
+        console.error("Failed to fetch members:", error);
+      }
+    };
+    fetchUsers();
+  }, []);
+
   const onSubmit = async (data: TypeofFinanceData) => {
     try {
       const { data: response } = await axios.post("/api/finance", data);
@@ -45,7 +57,7 @@ const AddFinance = () => {
 
       setOpen(false);
       reset();
-      window.location.reload();
+      // window.location.reload();
     } catch (err) {
       if (err instanceof AxiosError) {
         toast.error(
@@ -62,7 +74,7 @@ const AddFinance = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="bg-primary hover:bg-primary/90">
-          <Plus className="h-4 w-4 mr-1" /> Add Transaction
+          <Plus className="h-4 w-4 mr-1" /> Add Finance
         </Button>
       </DialogTrigger>
 
@@ -70,13 +82,37 @@ const AddFinance = () => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Wallet className="h-5 w-5" />
-            <span>Add Finance Transaction</span>
+            <span>Add Finance</span>
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
+            <div className="col-span-2 w-full">
+              <Label htmlFor="memberId">Member (Optional)</Label>
+              <Controller
+                name="memberId"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select member" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {members?.map((member) => (
+                        <SelectItem key={member.id} value={member.id}>
+                          {member.firstName} {member.lastName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+            <div>
               <Label htmlFor="type">Type</Label>
               <Controller
                 name="type"
@@ -222,7 +258,7 @@ const AddFinance = () => {
 
           <div className="grid gap-2">
             <Label htmlFor="notes">Notes (Optional)</Label>
-            <Input type="text" placeholder="Notes" {...register("notes")} />
+            {/* <Textarea placeholder="Notes" {...register("notes")} /> */}
           </div>
 
           <DialogFooter>

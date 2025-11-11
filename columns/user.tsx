@@ -10,8 +10,8 @@ type UserTable = {
   id: string;
   name: string;
   email: string;
-  emailVerified: boolean;
-  image?: any;
+  role?: string | null;
+  image?: any | null;
 };
 
 export const columns: ColumnDef<UserTable>[] = [
@@ -41,10 +41,9 @@ export const columns: ColumnDef<UserTable>[] = [
     id: "image",
     accessorKey: "image",
     header: "Image",
-
     cell: ({ row }) => (
       <Image
-        src={row.original.image}
+        src={row.original.image || null}
         alt="Image"
         width={40}
         height={40}
@@ -58,7 +57,6 @@ export const columns: ColumnDef<UserTable>[] = [
     header: "Name",
     cell: ({ row }) => <div className="truncate w-44">{row.original.name}</div>,
   },
-
   {
     id: "email",
     accessorKey: "email",
@@ -68,16 +66,12 @@ export const columns: ColumnDef<UserTable>[] = [
     ),
   },
   {
-    id: "emailVerified",
-    accessorKey: "emailVerified",
-    header: "Email Verified",
+    id: "role",
+    accessorKey: "role",
+    header: "Role",
     cell: ({ row }) => (
-      <div className="truncate w-44">
-        {row.original.emailVerified ? (
-          <Check className="h-4 w-4 text-green-500" />
-        ) : (
-          <X className="h-4 w-4 text-red-500" />
-        )}
+      <div className="truncate w-44 capitalize">
+        {row.original.role || "User"}
       </div>
     ),
   },
