@@ -1,11 +1,57 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { authClient } from "@/lib/auth-client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function Home() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const handleGoogleSignIn = async () => {
+    await authClient.signIn.social(
+      {
+        disableRedirect: true,
+        provider: "google",
+      },
+      {
+        onSuccess: () => {
+          router.push("/dashboard");
+        },
+        onError: (error) => {
+          console.error(error);
+          toast.error(error.error.data?.message || "Something went wrong");
+        },
+      }
+    );
+  };
+
+  const handleEmailSignIn = async () => {
+    await authClient.signIn.email(
+      {
+        callbackURL: "/",
+        email: email,
+        password: password,
+        rememberMe: true,
+      },
+      {
+        onSuccess: () => {
+          router.push("/dashboard");
+        },
+        onError: (error) => {
+          console.error(error);
+          toast.error(error.error.data?.message || "Something went wrong");
+        },
+      }
+    );
+  };
+
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-gray-50 via-purple-50/30 to-indigo-50/40 p-4 lg:p-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 w-full max-w-6xl bg-white shadow-lg overflow-hidden">
@@ -41,6 +87,7 @@ export default function Home() {
               type="button"
               variant="outline"
               className="w-full h-12 mb-5 justify-center gap-2 border-gray-200 hover:bg-gray-50"
+              onClick={handleGoogleSignIn}
             >
               <svg
                 className="w-5 h-5"
@@ -93,6 +140,8 @@ export default function Home() {
                   type="email"
                   placeholder="mail@website.com"
                   className="h-11"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
 
@@ -109,6 +158,8 @@ export default function Home() {
                   type="password"
                   placeholder="Min. 8 character"
                   className="h-11"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
 
@@ -133,8 +184,9 @@ export default function Home() {
 
               {/* Login Button */}
               <Button
-                type="submit"
+                type="button"
                 className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                onClick={handleEmailSignIn}
               >
                 Login
               </Button>
