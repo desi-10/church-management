@@ -32,11 +32,11 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 const chartConfig = {
   members: {
     label: "Members",
-    color: "hsl(217, 91%, 60%)", // blue
+    color: "hsl(221, 83%, 53%)", // blue-600
   },
   newTimers: {
     label: "New Timers",
-    color: "hsl(142, 71%, 45%)", // green
+    color: "hsl(38, 92%, 50%)", // amber-400
   },
 } satisfies ChartConfig;
 
@@ -151,29 +151,33 @@ export function AttendanceChart() {
               <linearGradient id="fillMembers" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="hsl(217, 91%, 60%)"
+                  stopColor="hsl(221, 83%, 53%)"
                   stopOpacity={0.8}
                 />
                 <stop
                   offset="95%"
-                  stopColor="hsl(217, 91%, 60%)"
+                  stopColor="hsl(221, 83%, 53%)"
                   stopOpacity={0.05}
                 />
               </linearGradient>
               <linearGradient id="fillNewTimers" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="hsl(142, 71%, 45%)"
+                  stopColor="hsl(38, 92%, 50%)"
                   stopOpacity={0.8}
                 />
                 <stop
                   offset="95%"
-                  stopColor="hsl(142, 71%, 45%)"
+                  stopColor="hsl(38, 92%, 50%)"
                   stopOpacity={0.05}
                 />
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} />
+            <CartesianGrid
+              vertical={false}
+              strokeDasharray="3 3"
+              opacity={0.3}
+            />
             <XAxis
               dataKey="date"
               tickLine={false}
@@ -205,14 +209,16 @@ export function AttendanceChart() {
               dataKey="members"
               type="natural"
               fill="url(#fillMembers)"
-              stroke="hsl(217, 91%, 60%)"
+              stroke="hsl(221, 83%, 53%)"
+              strokeWidth={2}
               stackId="a"
             />
             <Area
               dataKey="newTimers"
               type="natural"
               fill="url(#fillNewTimers)"
-              stroke="hsl(142, 71%, 45%)"
+              stroke="hsl(38, 92%, 50%)"
+              strokeWidth={2}
               stackId="a"
             />
           </AreaChart>

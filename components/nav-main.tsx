@@ -1,7 +1,7 @@
 "use client";
 
-import * as React from "react";
-import { type Icon } from "@tabler/icons-react";
+import type * as React from "react";
+import type { Icon } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -30,13 +30,16 @@ export function NavMain({
 
   return (
     <SidebarGroup>
-      <SidebarGroupContent className="flex flex-col gap-1">
-        <div className="px-3 mb-4">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Navigation
+      <SidebarGroupContent className="flex flex-col gap-2">
+        {/* Navigation Label */}
+        <div className="px-3 mb-2">
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+            Menu
           </p>
         </div>
-        <SidebarMenu className="space-y-1">
+
+        {/* Navigation Items */}
+        <SidebarMenu className="space-y-1.5">
           {items.map((item) => {
             const isActive = pathname === item.url;
 
@@ -45,47 +48,61 @@ export function NavMain({
                 href={item.url}
                 key={item.title}
                 className={`
-                   relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium
-                  transition-all duration-200 ease-in-out
+                  group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium
+                  transition-all duration-300 ease-out
                   ${
                     isActive
-                      ? "bg-gradient-to-r from-primary/15 to-primary/5 text-primary shadow-sm shadow-primary/10"
-                      : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                      ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-600/30 scale-[1.02]"
+                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900 active:scale-[0.98]"
                   }
                 `}
               >
-                {/* Active indicator */}
+                {/* Active glow effect */}
                 {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
+                  <div className="absolute inset-0 bg-blue-400/20 rounded-xl blur-md -z-10 animate-pulse" />
                 )}
+
+                {/* Icon */}
                 <div
                   className={`
-                  transition-transform duration-200
-                  ${isActive ? "scale-110" : ""}
-                `}
+                    flex items-center justify-center transition-all duration-300
+                    ${isActive ? "scale-110" : "group-hover:scale-110"}
+                  `}
                 >
                   {item.icon && (
                     <item.icon
                       size={20}
                       strokeWidth={isActive ? 2.5 : 2}
                       className={`
-                        transition-all duration-200
-                        ${isActive ? "text-primary" : "text-muted-foreground"}
+                        transition-all duration-300
+                        ${
+                          isActive
+                            ? "text-white drop-shadow-sm"
+                            : "text-gray-600 group-hover:text-gray-900"
+                        }
                       `}
                     />
                   )}
                 </div>
+
+                {/* Title */}
                 <span
                   className={`
-                  transition-all duration-200
-                  ${isActive ? "font-semibold" : "font-medium"}
-                `}
+                    flex-1 transition-all duration-300
+                    ${isActive ? "font-semibold tracking-wide" : "font-medium"}
+                  `}
                 >
                   {item.title}
                 </span>
-                {/* Hover effect */}
+
+                {/* Active indicator dot */}
+                {isActive && (
+                  <div className="w-1.5 h-1.5 rounded-full bg-white/90 shadow-sm" />
+                )}
+
+                {/* Hover shimmer effect */}
                 {!isActive && (
-                  <div className="absolute inset-0 rounded-lg bg-primary/0 group-hover:bg-primary/5 transition-colors duration-200 -z-10" />
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-blue-100/0 to-transparent group-hover:via-blue-100/50 transition-all duration-500 -z-10" />
                 )}
               </Link>
             );

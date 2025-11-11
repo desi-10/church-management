@@ -5,13 +5,16 @@ import { ArrowUpDown, Edit2, Trash, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
+import Image from "next/image";
 
 type MemberTable = {
   id: string;
-  username: string;
-  email: string;
-  phone: string;
-  address: string;
+  firstName: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  image?: any;
 };
 
 export const columns: ColumnDef<MemberTable>[] = [
@@ -38,20 +41,35 @@ export const columns: ColumnDef<MemberTable>[] = [
     enableHiding: false,
   },
   {
-    id: "username",
-    accessorKey: "username",
-    header: "Username",
+    id: "image",
+    accessorKey: "image",
+    header: "Image",
+
     cell: ({ row }) => (
-      <div className="truncate w-44">{row.original.username}</div>
+      <Image
+        src={row.original.image}
+        alt="Image"
+        width={40}
+        height={40}
+        className="w-10 h-10 object-cover rounded-lg border"
+      />
+    ),
+  },
+  {
+    id: "firstName",
+    accessorKey: "firstName",
+    header: "First Name",
+    cell: ({ row }) => (
+      <div className="truncate w-44">{row.original.firstName}</div>
     ),
   },
 
   {
-    id: "email",
-    accessorKey: "email",
-    header: "Email",
+    id: "lastName",
+    accessorKey: "lastName",
+    header: "Last Name",
     cell: ({ row }) => (
-      <div className="truncate w-44">{row.original.email}</div>
+      <div className="truncate w-44">{row.original.lastName}</div>
     ),
   },
   {
@@ -80,26 +98,14 @@ export const columns: ColumnDef<MemberTable>[] = [
           <Button
             variant="outline"
             size="sm"
-            className="text-blue-500 hover:bg-blue-500 hover:text-white"
-            onClick={() => {
-              const event = new CustomEvent("openMemberDialog", {
-                detail: { mode: "view", member: data },
-              });
-              window.dispatchEvent(event);
-            }}
+            className="text-primary hover:bg-blue-700 hover:text-white"
           >
             <Eye className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
             size="sm"
-            className="text-emerald-500 hover:bg-emerald-500 hover:text-white"
-            onClick={() => {
-              const event = new CustomEvent("openMemberDialog", {
-                detail: { mode: "edit", member: data },
-              });
-              window.dispatchEvent(event);
-            }}
+            className="text-emerald-500 hover:bg-emerald-600 hover:text-white"
           >
             <Edit2 className="h-4 w-4" />
           </Button>
@@ -107,12 +113,6 @@ export const columns: ColumnDef<MemberTable>[] = [
             variant="outline"
             size="sm"
             className="text-rose-500 hover:bg-rose-500 hover:text-white"
-            onClick={() => {
-              const event = new CustomEvent("openMemberDialog", {
-                detail: { mode: "delete", member: data },
-              });
-              window.dispatchEvent(event);
-            }}
           >
             <Trash className="h-4 w-4" />
           </Button>

@@ -1,20 +1,17 @@
 import { asyncHandler } from "@/utils/async-handler";
-import { apiResponse } from "@/utils/api-response";
 import { NextResponse } from "next/server";
-import StatusCodes from "http-status-codes";
-import { createMember, getMembers } from "@/features/members/members.services";
+import * as memberService from "@/features/members/members.services";
 import { MemberDataSchema } from "@/validators/members";
-import { validateRequest } from "@/utils/validator-helper";
+import { validateRequestFormData } from "@/utils/validator-helper";
+import { TypeofMemberData } from "@/validators/members";
 
 export const GET = asyncHandler(async () => {
-  const result = await getMembers();
+  const result = await memberService.getMembers();
   return NextResponse.json(result);
 });
 
 export const POST = asyncHandler(async (req: Request) => {
-  const data = await validateRequest(req, MemberDataSchema);
-  const result = await createMember(data);
-  return NextResponse.json(apiResponse("Member created successfully", result), {
-    status: StatusCodes.ACCEPTED,
-  });
+  const data = await validateRequestFormData(req, MemberDataSchema);
+  const result = await memberService.createMember(data as TypeofMemberData);
+  return NextResponse.json(result);
 });

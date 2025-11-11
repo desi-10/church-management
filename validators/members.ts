@@ -6,6 +6,7 @@ export const MemberDataSchema = z.object({
   email: z.email().optional(),
   phone: z.string().optional(),
   address: z.string().optional(),
+  image: z.any().optional(),
 });
 
 export type TypeofMemberData = z.infer<typeof MemberDataSchema>;

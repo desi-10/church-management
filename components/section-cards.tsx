@@ -8,10 +8,8 @@ import {
   IconArrowUpRight,
 } from "@tabler/icons-react";
 
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
-  CardAction,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -74,106 +72,110 @@ export function SectionCards() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-      {/* Total Revenue */}
-      <Card className="bg-emerald-50 dark:bg-emerald-900/20">
-        <CardHeader>
-          <CardDescription>Total Revenue</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl text-emerald-700 dark:text-emerald-400">
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Total Revenue Card */}
+      <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-blue-600 to-blue-700 text-white">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16" />
+        <CardHeader className="relative z-10 pb-2">
+          <CardDescription className="text-blue-100 text-xs font-medium uppercase tracking-wide">
+            Total Revenue
+          </CardDescription>
+          <CardTitle className="text-4xl font-bold mt-2">
             GHS {parseFloat(stats.totalRevenue).toLocaleString()}
           </CardTitle>
-          <CardAction>
-            <Badge
-              variant="outline"
-              className="text-emerald-600 border-emerald-300 dark:border-emerald-700"
-            >
-              <IconTrendingUp />
-              {stats.revenueChange}
-            </Badge>
-          </CardAction>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="flex gap-2 font-medium text-emerald-700 dark:text-emerald-400">
-            Total contributions <IconTrendingUp className="size-4" />
+        <CardFooter className="relative z-10 pt-4 border-t border-white/10">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                <IconTrendingUp className="size-4" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold">{stats.revenueChange}</p>
+                <p className="text-xs text-blue-100">vs last month</p>
+              </div>
+            </div>
           </div>
-          <div className="text-muted-foreground">All time revenue</div>
         </CardFooter>
       </Card>
 
-      {/* Members */}
-      <Card className="bg-sky-50 dark:bg-sky-900/20">
-        <CardHeader>
-          <CardDescription>Members</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl text-sky-700 dark:text-sky-400">
+      {/* Total Members Card */}
+      <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-purple-600 to-purple-700 text-white">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16" />
+        <CardHeader className="relative z-10 pb-2">
+          <CardDescription className="text-purple-100 text-xs font-medium uppercase tracking-wide">
+            Total Members
+          </CardDescription>
+          <CardTitle className="text-4xl font-bold mt-2">
             {stats.totalMembers.toLocaleString()}
           </CardTitle>
-          <CardAction>
-            <Badge
-              variant="outline"
-              className="text-sky-600 border-sky-300 dark:border-sky-700"
-            >
-              <IconUsers />
-              {stats.membersChange}
-            </Badge>
-          </CardAction>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="flex gap-2 font-medium text-sky-700 dark:text-sky-400">
-            Growing community <IconUsers className="size-4" />
+        <CardFooter className="relative z-10 pt-4 border-t border-white/10">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                <IconUsers className="size-4" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold">+{stats.membersChange}</p>
+                <p className="text-xs text-purple-100">new this month</p>
+              </div>
+            </div>
           </div>
-          <div className="text-muted-foreground">Active members registered</div>
         </CardFooter>
       </Card>
 
-      {/* New Timers */}
-      <Card className="bg-orange-50 dark:bg-orange-900/20">
-        <CardHeader>
-          <CardDescription>New Timers</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl text-orange-700 dark:text-orange-400">
+      {/* New Timers Card */}
+      <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-amber-400 to-amber-500 text-gray-900">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full -mr-16 -mt-16" />
+        <CardHeader className="relative z-10 pb-2">
+          <CardDescription className="text-amber-900 text-xs font-medium uppercase tracking-wide">
+            New Timers
+          </CardDescription>
+          <CardTitle className="text-4xl font-bold mt-2">
             {stats.newTimers}
           </CardTitle>
-          <CardAction>
-            <Badge
-              variant="outline"
-              className="text-orange-600 border-orange-300 dark:border-orange-700"
-            >
-              <IconUserPlus />
-              {stats.newTimersChange}
-            </Badge>
-          </CardAction>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="flex gap-2 font-medium text-orange-700 dark:text-orange-400">
-            First-time participants <IconUserPlus className="size-4" />
-          </div>
-          <div className="text-muted-foreground">
-            Fresh engagements this month
+        <CardFooter className="relative z-10 pt-4 border-t border-amber-600/20">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-white/30 rounded-lg backdrop-blur-sm">
+                <IconUserPlus className="size-4" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold">
+                  +{stats.newTimersChange}
+                </p>
+                <p className="text-xs text-amber-900">this month</p>
+              </div>
+            </div>
           </div>
         </CardFooter>
       </Card>
 
-      {/* Growth Rate */}
-      <Card className="bg-violet-50 dark:bg-violet-900/20">
-        <CardHeader>
-          <CardDescription>Growth Rate</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl text-violet-700 dark:text-violet-400">
+      {/* Growth Rate Card */}
+      <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-bl from-green-500 to-green-600 text-gray-900">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full -mr-16 -mt-16" />
+        <CardHeader className="relative z-10 pb-2">
+          <CardDescription className="text-white text-xs font-medium uppercase tracking-wide">
+            Growth Rate
+          </CardDescription>
+          <CardTitle className="text-4xl font-bold mt-2 text-white">
             {stats.growthRate}
           </CardTitle>
-          <CardAction>
-            <Badge
-              variant="outline"
-              className="text-violet-600 border-violet-300 dark:border-violet-700"
-            >
-              <IconArrowUpRight />
-              {stats.growthRate}
-            </Badge>
-          </CardAction>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="flex gap-2 font-medium text-violet-700 dark:text-violet-400">
-            Member growth <IconTrendingUp className="size-4" />
+        <CardFooter className="relative z-10 pt-4 border-t border-white/20">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-white/30 rounded-lg backdrop-blur-sm">
+                <IconArrowUpRight className="size-4" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">Monthly</p>
+                <p className="text-xs text-white">member growth</p>
+              </div>
+            </div>
           </div>
-          <div className="text-muted-foreground">Monthly growth rate</div>
         </CardFooter>
       </Card>
     </div>

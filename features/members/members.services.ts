@@ -6,9 +6,27 @@ import StatusCodes from "http-status-codes";
 import { ApiError } from "@/utils/api-error";
 import { findMemberById } from "./member.utils";
 
-export const getMembers = async () => {
-  const members = await prisma.member.findMany();
-  return apiResponse("Members fetched successfully", members);
+export const getMembers = async (page: number = 1, limit: number = 10) => {
+  const members = await prisma.member.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    skip: (page - 1) * limit,
+    take: limit,
+  });
+  const totalMembers = await prisma.member.count();
+  const totalPages = Math.ceil(totalMembers / limit);
+  const hasNextPage = page < totalPages;
+  const hasPrevPage = page > 1;
+  return apiResponse("Members fetched successfully", {
+    members,
+    pagination: {
+      page,
+      totalPages,
+      hasNextPage,
+      hasPrevPage,
+    },
+  });
 };
 
 export const createMember = async (memberData: TypeofMemberData) => {

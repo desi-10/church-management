@@ -1,42 +1,56 @@
 "use client";
-import { useState, useEffect } from "react";
-import { columns } from "@/columns/finance";
 import { DataTable } from "@/components/data-table";
-import AddFinance from "@/components/dialogs/finance/add.finance";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ExportButtons } from "@/components/export-buttons";
+import AddUser from "@/components/dialogs/users/add-user";
+import { columns } from "@/columns/user";
 
-const FinancePage = () => {
-  const [finances, setFinances] = useState<any>(null);
+const UsersPage = () => {
+  const [users, setUsers] = useState<any>(null);
 
   useEffect(() => {
-    const fetchFinances = async () => {
-      const response = await axios.get("/api/finance");
+    const fetchUsers = async () => {
+      const response = await axios.get("/api/user");
       const data = response.data;
-      setFinances(data);
+      setUsers(data);
     };
-    fetchFinances();
+    fetchUsers();
   }, []);
 
   return (
     <div>
       <div className="w-full mb-10 flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold text-primary">Finance</h1>
-          <p className="h-2 w-full bg-amber-400 -mt-3" />
+          <h1 className="text-4xl font-bold text-primary">Users</h1>
+          <p className="h-2 w-full bg bg-amber-500 -mt-3" />
         </div>
 
         <div className="flex items-center gap-3">
-          <AddFinance />
+          <ExportButtons
+            data={users?.data?.users || []}
+            fileName="users"
+            title="Users Report"
+            columns={[
+              { header: "First Name", dataKey: "firstName" },
+              { header: "Last Name", dataKey: "lastName" },
+              { header: "Email", dataKey: "email" },
+              { header: "Phone", dataKey: "phone" },
+              { header: "Address", dataKey: "address" },
+            ]}
+          />
+          <AddUser />
         </div>
       </div>
 
       <div className="w-full">
-        {finances ? (
-          <DataTable data={finances.data.finances || []} columns={columns} />
+        {users ? (
+          <DataTable data={users.data.users || []} columns={columns} />
         ) : (
           <div className="text-xs">
             <div className="rounded-md">
+              {/* Table Controls Skeleton */}
               <div className="flex justify-between items-center mb-5">
                 <Skeleton className="h-10 w-full max-w-sm rounded-md" />
                 <div className="flex space-x-3">
@@ -44,10 +58,12 @@ const FinancePage = () => {
                 </div>
               </div>
 
+              {/* Table Skeleton */}
               <div className="rounded-md border">
+                {/* Table Header */}
                 <div className="border-b bg-gray-50/50">
                   <div className="flex">
-                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                    {[1, 2, 3, 4, 5].map((i) => (
                       <div key={i} className="flex-1 p-4">
                         <Skeleton className="h-4 w-20" />
                       </div>
@@ -55,13 +71,14 @@ const FinancePage = () => {
                   </div>
                 </div>
 
+                {/* Table Rows */}
                 <div>
                   {[1, 2, 3, 4, 5, 6, 7, 8].map((row) => (
                     <div
                       key={row}
                       className="flex border-b last:border-b-0 hover:bg-gray-50/50"
                     >
-                      {[1, 2, 3, 4, 5, 6].map((col) => (
+                      {[1, 2, 3, 4, 5].map((col) => (
                         <div key={col} className="flex-1 p-4">
                           <Skeleton className="h-4 w-full max-w-[150px]" />
                         </div>
@@ -71,6 +88,7 @@ const FinancePage = () => {
                 </div>
               </div>
 
+              {/* Pagination Skeleton */}
               <div className="mt-8 flex items-center justify-between">
                 <Skeleton className="h-4 w-48" />
                 <div className="flex items-center gap-2">
@@ -87,5 +105,4 @@ const FinancePage = () => {
     </div>
   );
 };
-
-export default FinancePage;
+export default UsersPage;

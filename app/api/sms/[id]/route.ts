@@ -1,26 +1,23 @@
 import { asyncHandler } from "@/utils/async-handler";
 import { NextResponse } from "next/server";
-import * as financeService from "@/features/finance/finance.services";
-import { FinanceDataSchema } from "@/validators/finance";
+import * as smsService from "@/features/sms/sms.services";
+import { SMSDataSchema } from "@/validators/sms";
 import { validateRequestFormData } from "@/utils/validator-helper";
-import { TypeofFinanceData } from "@/validators/finance";
+import { TypeofSMSData } from "@/validators/sms";
 
 export const GET = asyncHandler(
   async (req: Request, { params }: { params: { id: string } }) => {
-    const result = await financeService.getFinanceById(params.id);
+    const result = await smsService.getScheduledSMSById(params.id);
     return NextResponse.json(result);
   }
 );
 
 export const PUT = asyncHandler(
   async (req: Request, { params }: { params: { id: string } }) => {
-    const data = await validateRequestFormData(
-      req,
-      FinanceDataSchema.partial()
-    );
-    const result = await financeService.updateFinance(
+    const data = await validateRequestFormData(req, SMSDataSchema.partial());
+    const result = await smsService.updateScheduledSMS(
       params.id,
-      data as Partial<TypeofFinanceData>
+      data as Partial<TypeofSMSData>
     );
     return NextResponse.json(result);
   }
@@ -28,7 +25,7 @@ export const PUT = asyncHandler(
 
 export const DELETE = asyncHandler(
   async (req: Request, { params }: { params: { id: string } }) => {
-    const result = await financeService.deleteFinance(params.id);
+    const result = await smsService.deleteScheduledSMS(params.id);
     return NextResponse.json(result);
   }
 );

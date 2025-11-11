@@ -38,15 +38,7 @@ import { toast } from "sonner";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
-  data: {
-    data: TData[];
-    pagination: {
-      page: number;
-      totalPages: number;
-      hasNextPage: boolean;
-      hasPrevPage: boolean;
-    };
-  };
+  data: TData[];
 }
 
 type TRows = {
@@ -64,7 +56,7 @@ export function DataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState<TRows>({});
   const table = useReactTable({
-    data: data?.data || [],
+    data: data || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -86,36 +78,36 @@ export function DataTable<TData, TValue>({
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleExcel = async () => {
-    const filteredData = data?.data?.filter((_, index) => rowSelection[index]);
-    if (filteredData.length !== 0) {
-      console.log("", filteredData);
-      // check emoji
-      setIsLoading(true);
+  // const handleExcel = async () => {
+  //   const filteredData = data?.data?.filter((_, index) => rowSelection[index]);
+  //   if (filteredData.length !== 0) {
+  //     console.log("", filteredData);
+  //     // check emoji
+  //     setIsLoading(true);
 
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      toast("✅ Data exported successfully");
-      setIsLoading(false);
-      setRowSelection([]);
-      return;
-    }
+  //     await new Promise((resolve) => setTimeout(resolve, 5000));
+  //     toast("✅ Data exported successfully");
+  //     setIsLoading(false);
+  //     setRowSelection([]);
+  //     return;
+  //   }
 
-    toast("No row selected");
-    // if (filteredData.length !== 0) {
-    //   const worksheet = XLSX.utils.json_to_sheet(filteredData);
-    //   const workbook = XLSX.utils.book_new();
-    //   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    //   // Buffer to store the generated Excel file
-    //   const excelBuffer = XLSX.write(workbook, {
-    //     bookType: "xlsx",
-    //     type: "array",
-    //   });
-    //   const blob = new Blob([excelBuffer], {
-    //     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
-    //   });
-    //   saveAs(blob, "data.xlsx");
-    //  }
-  };
+  //   toast("No row selected");
+  //   // if (filteredData.length !== 0) {
+  //   //   const worksheet = XLSX.utils.json_to_sheet(filteredData);
+  //   //   const workbook = XLSX.utils.book_new();
+  //   //   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+  //   //   // Buffer to store the generated Excel file
+  //   //   const excelBuffer = XLSX.write(workbook, {
+  //   //     bookType: "xlsx",
+  //   //     type: "array",
+  //   //   });
+  //   //   const blob = new Blob([excelBuffer], {
+  //   //     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+  //   //   });
+  //   //   saveAs(blob, "data.xlsx");
+  //   //  }
+  // };
 
   return (
     <div className="text-xs">
@@ -156,14 +148,14 @@ export function DataTable<TData, TValue>({
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button
+            {/* <Button
               variant={"outline"}
               onClick={handleExcel}
               disabled={isLoading}
               className="border border-primaryColor text-primaryColor hover:bg-primaryColor/90 hover:text-white"
-            >
-              {/* {isLoading ? <Loader color="#f77f1e" /> : "Batch Update"} */}
-            </Button>
+            > */}
+            {/* {isLoading ? <Loader color="#f77f1e" /> : "Batch Update"} */}
+            {/* </Button> */}
           </div>
         </div>
         <div className="">

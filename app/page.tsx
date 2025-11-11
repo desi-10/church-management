@@ -9,11 +9,31 @@ import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Loader2 } from "lucide-react";
+
+const LoginDataSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  // remember: z.boolean().default(false),
+});
+
+export type TypeofLoginData = z.infer<typeof LoginDataSchema>;
 
 export default function Home() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<TypeofLoginData>({
+    resolver: zodResolver(LoginDataSchema),
+  });
+
   const handleGoogleSignIn = async () => {
     await authClient.signIn.social(
       {
@@ -32,12 +52,11 @@ export default function Home() {
     );
   };
 
-  const handleEmailSignIn = async () => {
+  const onSubmit = async (data: TypeofLoginData) => {
     await authClient.signIn.email(
       {
-        callbackURL: "/",
-        email: email,
-        password: password,
+        email: data.email,
+        password: data.password,
         rememberMe: true,
       },
       {
@@ -51,6 +70,8 @@ export default function Home() {
       }
     );
   };
+
+  console.log(errors);
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-gray-50 via-purple-50/30 to-indigo-50/40 p-4 lg:p-8">
@@ -68,7 +89,7 @@ export default function Home() {
               />
             </div>
             <span className="text-base font-semibold text-gray-900">
-              Christ Assembly Worldwide
+              Christ Assembly Worldwide - Ho
             </span>
           </div>
 
@@ -87,7 +108,7 @@ export default function Home() {
               type="button"
               variant="outline"
               className="w-full h-12 mb-5 justify-center gap-2 border-gray-200 hover:bg-gray-50"
-              onClick={handleGoogleSignIn}
+              // onClick={handleGoogleSignIn}
             >
               <svg
                 className="w-5 h-5"
@@ -138,10 +159,9 @@ export default function Home() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="mail@website.com"
+                  placeholder="mail@example.com"
                   className="h-11"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  {...register("email")}
                 />
               </div>
 
@@ -156,17 +176,23 @@ export default function Home() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Min. 8 character"
+                  placeholder="********"
                   className="h-11"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...register("password")}
                 />
               </div>
 
               {/* Remember Me & Forgot Password */}
               <div className="flex items-center justify-between pt-1">
                 <div className="flex items-center gap-2">
-                  <Checkbox id="remember" />
+                  <Checkbox
+                    id="remember"
+                    // {...register("remember")}
+                    // value={watch("remember") ? "true" : "false"}
+                    // onChange={(e) => {
+                    //   setValue("remember", e.target.value === "true");
+                    // }}
+                  />
                   <Label
                     htmlFor="remember"
                     className="text-sm font-normal text-gray-700 cursor-pointer"
@@ -175,8 +201,8 @@ export default function Home() {
                   </Label>
                 </div>
                 <Link
-                  href="#"
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  href="/forgot-password"
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -186,9 +212,16 @@ export default function Home() {
               <Button
                 type="button"
                 className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium"
-                onClick={handleEmailSignIn}
+                onClick={handleSubmit(onSubmit)}
               >
-                Login
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="text-white">Logging in...</span>
+                  </>
+                ) : (
+                  <span className="text-white">Login</span>
+                )}
               </Button>
 
               {/* Sign Up Link */}

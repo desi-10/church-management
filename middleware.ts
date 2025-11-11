@@ -7,7 +7,7 @@ export async function middleware(request: NextRequest) {
   // THIS IS NOT SECURE!
   // This is the recommended approach to optimistically redirect users
   // We recommend handling auth checks in each page/route
-  if (!sessionCookie && request.nextUrl.pathname !== "/") {
+  if (!sessionCookie && request.nextUrl.pathname.startsWith("/dashboard")) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 

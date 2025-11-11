@@ -1,54 +1,34 @@
-import { prisma } from "@/utils/db";
 import { asyncHandler } from "@/utils/async-handler";
 import { NextResponse } from "next/server";
+import * as attendanceService from "@/features/attendance/attendance.services";
+import { AttendanceDataSchema } from "@/validators/attendance";
+import { validateRequestFormData } from "@/utils/validator-helper";
+import { TypeofAttendanceData } from "@/validators/attendance";
 
 export const GET = asyncHandler(
-  async (_req: Request, { params }: { params: { id: string } }) => {
-    const attendance = await prisma.attendance.findUnique({
-      where: { id: params.id },
-    });
-
-    if (!attendance) {
-      return NextResponse.json(
-        { success: false, message: "Attendance not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ success: true, data: attendance });
+  async (req: Request, { params }: { params: { id: string } }) => {
+    const result = await attendanceService.getAttendanceById(params.id);
+    return NextResponse.json(result);
   }
 );
 
 export const PUT = asyncHandler(
   async (req: Request, { params }: { params: { id: string } }) => {
-    const body = await req.json();
-    const { firstname, lastname, status, date } = body;
-
-    const attendance = await prisma.attendance.update({
-      where: { id: params.id },
-      data: {
-        firstname: firstname || "",
-        lastname: lastname || "",
-        status:
-          status === "Present"
-            ? "PRESENT"
-            : status === "Absent"
-            ? "ABSENT"
-            : "LATE",
-        date: date ? new Date(date) : new Date(),
-      },
-    });
-
-    return NextResponse.json({ success: true, data: attendance });
+    const data = await validateRequestFormData(
+      req,
+      AttendanceDataSchema.partial()
+    );
+    const result = await attendanceService.updateAttendance(
+      params.id,
+      data as Partial<TypeofAttendanceData>
+    );
+    return NextResponse.json(result);
   }
 );
 
 export const DELETE = asyncHandler(
-  async (_req: Request, { params }: { params: { id: string } }) => {
-    await prisma.attendance.delete({
-      where: { id: params.id },
-    });
-
-    return NextResponse.json({ success: true, message: "Attendance deleted" });
+  async (req: Request, { params }: { params: { id: string } }) => {
+    const result = await attendanceService.deleteAttendance(params.id);
+    return NextResponse.json(result);
   }
 );

@@ -1,21 +1,17 @@
-import { prisma } from "@/utils/db";
 import { asyncHandler } from "@/utils/async-handler";
 import { NextResponse } from "next/server";
-import {
-  createFinance,
-  getAllFinaces,
-} from "@/features/finance/finance.service";
+import * as financeService from "@/features/finance/finance.services";
+import { FinanceDataSchema } from "@/validators/finance";
 import { validateRequest } from "@/utils/validator-helper";
-import { financeSchema } from "@/features/finance/finance.validator";
-import { StatusCodes } from "http-status-codes";
+import { TypeofFinanceData } from "@/validators/finance";
 
 export const GET = asyncHandler(async () => {
-  const result = await getAllFinaces();
+  const result = await financeService.getFinances();
   return NextResponse.json(result);
 });
 
 export const POST = asyncHandler(async (req: Request) => {
-  const parsed = await validateRequest(req, financeSchema);
-  const result = await createFinance(parsed);
-  return NextResponse.json(result, { status: StatusCodes.CREATED });
+  const data = await validateRequest(req, FinanceDataSchema);
+  const result = await financeService.createFinance(data as TypeofFinanceData);
+  return NextResponse.json(result);
 });
