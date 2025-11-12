@@ -12,6 +12,7 @@ export async function validateRequest<T extends z.ZodTypeAny>(
 ): Promise<z.infer<T>> {
   try {
     const body = await req.json();
+    console.log(body, "body");
     const result = schema.safeParse(body);
 
     if (!result.success) {

@@ -4,33 +4,44 @@ import { TypeofSMSData } from "@/validators/sms";
 import StatusCodes from "http-status-codes";
 import { ApiError } from "@/utils/api-error";
 import { SMSStatus } from "@prisma/client";
+import { sendArkeselSMS } from "@/utils/arkesel";
 
 export const sendSMS = async (smsData: TypeofSMSData) => {
-  const { message, recipients, scheduledFor } = smsData;
+  const { message, recipients, scheduledFor, dayOfWeek, isRecurring } = smsData;
 
-  // If scheduled, save to database
-  if (scheduledFor) {
+  const recipientsString = JSON.stringify(recipients);
+
+  // 1️⃣ Scheduled or recurring message
+  if (scheduledFor && isRecurring && dayOfWeek) {
+    const scheduleDate = scheduledFor ? new Date(scheduledFor) : new Date();
+    const weekday =
+      dayOfWeek !== undefined
+        ? parseInt(dayOfWeek as any)
+        : scheduleDate.getDay();
+
     const scheduledSMS = await prisma.scheduledSMS.create({
       data: {
         message,
-        recipients: JSON.stringify(recipients),
-        scheduledFor: new Date(scheduledFor),
+        recipients: recipientsString,
+        scheduledFor: scheduleDate,
+        dayOfWeek: weekday,
+        isRecurring: !!isRecurring,
         status: SMSStatus.PENDING,
       },
     });
 
-    return apiResponse("SMS scheduled successfully", scheduledSMS);
+    return apiResponse(
+      isRecurring
+        ? "Recurring SMS scheduled successfully"
+        : "SMS scheduled successfully",
+      scheduledSMS
+    );
   }
 
-  // Otherwise, send immediately (mock implementation)
-  // In production, integrate with actual SMS service (Twilio, etc.)
-  console.log("Sending SMS to:", recipients);
-  console.log("Message:", message);
+  // 2️⃣ Immediate send
+  await sendArkeselSMS(recipients, message, scheduledFor || new Date());
 
-  return apiResponse("SMS sent successfully", {
-    sentCount: recipients.length,
-    recipients,
-  });
+  return apiResponse("SMS sent successfully", null);
 };
 
 export const getScheduledSMS = async () => {

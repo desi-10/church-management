@@ -18,20 +18,34 @@ import { SMSDataSchema, TypeofSMSData } from "@/validators/sms";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const AddSMS = () => {
   const [open, setOpen] = useState(false);
   const [members, setMembers] = useState<any[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
 
+  type FormData = {
+    message: string;
+    scheduledFor?: string;
+    isRecurring: boolean;
+    dayOfWeek: number;
+  };
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<{ message: string; scheduledFor?: string }>({
-    resolver: zodResolver(SMSDataSchema.omit({ recipients: true })),
-  });
+    watch,
+    setValue,
+  } = useForm<FormData>();
 
   useEffect(() => {
     const fetchMembers = async () => {
@@ -67,31 +81,27 @@ const AddSMS = () => {
     setSelectedMembers([]);
   };
 
-  const onSubmit = async (data: { message: string; scheduledFor?: string }) => {
+  const onSubmit = async (data: FormData) => {
     if (selectedMembers.length === 0) {
       toast.error("Please select at least one recipient");
       return;
     }
 
+    const payload = {
+      message: data.message,
+      recipients: selectedMembers,
+      scheduledFor: data.scheduledFor ? new Date(data.scheduledFor) : null,
+      dayOfWeek: 0,
+      isRecurring: false,
+    };
+
     try {
-      const formData = new FormData();
-      formData.append("message", data.message);
-      formData.append("recipients", JSON.stringify(selectedMembers));
-      if (data.scheduledFor) {
-        formData.append("scheduledFor", data.scheduledFor);
-      }
-
-      const { data: response } = await axios.post("/api/sms", formData);
-      if (response.success) {
-        toast.success(
-          data.scheduledFor ? "SMS scheduled successfully" : response.message
-        );
-      }
-
+      const { data: response } = await axios.post("/api/sms", payload);
+      toast.success(response.message);
       setOpen(false);
       reset();
       setSelectedMembers([]);
-      window.location.reload();
+      // window.location.reload();
     } catch (err) {
       if (err instanceof AxiosError) {
         toast.error(
@@ -131,6 +141,62 @@ const AddSMS = () => {
             {errors.message && (
               <p className="text-sm text-red-500">{errors.message.message}</p>
             )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="isRecurring">Is Recurring</Label>
+              <Select
+                {...register("isRecurring")}
+                value={watch("isRecurring") ? "true" : "false"}
+                onValueChange={(value) =>
+                  setValue("isRecurring", value === "true")
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select recurring type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="true">True</SelectItem>
+                  <SelectItem value="false">False</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="dayOfWeek">Day of Week</Label>
+              <Select
+                {...register("dayOfWeek")}
+                value={
+                  watch("dayOfWeek") !== undefined
+                    ? watch("dayOfWeek").toString()
+                    : "-1"
+                }
+                onValueChange={(value) =>
+                  setValue("dayOfWeek", parseInt(value) ? parseInt(value) : -1)
+                }
+                disabled={!watch("isRecurring")}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select day of week" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="-1">No day of week</SelectItem>
+                  <SelectItem value="0">Sunday</SelectItem>
+                  <SelectItem value="1">Monday</SelectItem>
+                  <SelectItem value="2">Tuesday</SelectItem>
+                  <SelectItem value="3">Wednesday</SelectItem>
+                  <SelectItem value="4">Thursday</SelectItem>
+                  <SelectItem value="5">Friday</SelectItem>
+                  <SelectItem value="6">Saturday</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.dayOfWeek && (
+                <p className="text-sm text-red-500">
+                  {errors.dayOfWeek.message}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="grid gap-2">
