@@ -1,7 +1,5 @@
-// @ts-expect-error - xlsx types may not be perfect
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
-// @ts-expect-error - jspdf-autotable types
 import autoTable from "jspdf-autotable";
 
 /**
