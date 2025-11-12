@@ -2,43 +2,14 @@ import { prisma } from "@/utils/db";
 import { asyncHandler } from "@/utils/async-handler";
 import { NextResponse } from "next/server";
 
-export const GET = asyncHandler(
-  async (_req: Request, { params }: { params: { id: string } }) => {
-    const scheduledSMS = await prisma.scheduledSMS.findUnique({
-      where: { id: params.id },
-    });
-
-    if (!scheduledSMS) {
-      return NextResponse.json(
-        { success: false, message: "Scheduled SMS not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        id: scheduledSMS.id,
-        message: scheduledSMS.message,
-        recipients: JSON.parse(scheduledSMS.recipients) as string[],
-        scheduledFor: scheduledSMS.scheduledFor,
-        status: scheduledSMS.status,
-        sentAt: scheduledSMS.sentAt,
-        sentCount: scheduledSMS.sentCount,
-        errorMessage: scheduledSMS.errorMessage,
-        createdAt: scheduledSMS.createdAt,
-      },
-    });
-  }
-);
-
 export const PUT = asyncHandler(
-  async (req: Request, { params }: { params: { id: string } }) => {
+  async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params;
     const body = await req.json();
     const { message, recipients, scheduledFor } = body;
 
     const scheduledSMS = await prisma.scheduledSMS.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!scheduledSMS) {
@@ -68,7 +39,7 @@ export const PUT = asyncHandler(
     }
 
     const updated = await prisma.scheduledSMS.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         message: message ? message.trim() : scheduledSMS.message,
         recipients: recipients
@@ -92,9 +63,10 @@ export const PUT = asyncHandler(
 );
 
 export const DELETE = asyncHandler(
-  async (_req: Request, { params }: { params: { id: string } }) => {
+  async (_req: Request, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params;
     const scheduledSMS = await prisma.scheduledSMS.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!scheduledSMS) {
@@ -107,12 +79,12 @@ export const DELETE = asyncHandler(
     // Can only delete PENDING SMS
     if (scheduledSMS.status !== "PENDING") {
       await prisma.scheduledSMS.update({
-        where: { id: params.id },
+        where: { id },
         data: { status: "CANCELLED" },
       });
     } else {
       await prisma.scheduledSMS.delete({
-        where: { id: params.id },
+        where: { id },
       });
     }
 
