@@ -6,7 +6,7 @@ export const sendArkeselSMS = async (
   scheduledFor?: Date
 ) => {
   const apiKey = process.env.ARKESEL_API_KEY;
-  const senderId = "MyChurch"; // Replace with your approved SenderID
+  const senderId = "CAW-HO"; // Replace with your approved SenderID
 
   const params: any = {
     api_key: apiKey,
