@@ -6,20 +6,22 @@ import { validateRequestFormData } from "@/utils/validator-helper";
 import { TypeofFinanceData } from "@/validators/finance";
 
 export const GET = asyncHandler(
-  async (req: Request, { params }: { params: { id: string } }) => {
-    const result = await financeService.getFinanceById(params.id);
+  async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params;
+    const result = await financeService.getFinanceById(id);
     return NextResponse.json(result);
   }
 );
 
 export const PUT = asyncHandler(
-  async (req: Request, { params }: { params: { id: string } }) => {
+  async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params;
     const data = await validateRequestFormData(
       req,
       FinanceDataSchema.partial()
     );
     const result = await financeService.updateFinance(
-      params.id,
+      id,
       data as Partial<TypeofFinanceData>
     );
     return NextResponse.json(result);
@@ -27,8 +29,9 @@ export const PUT = asyncHandler(
 );
 
 export const DELETE = asyncHandler(
-  async (req: Request, { params }: { params: { id: string } }) => {
-    const result = await financeService.deleteFinance(params.id);
+  async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params;
+    const result = await financeService.deleteFinance(id);
     return NextResponse.json(result);
   }
 );

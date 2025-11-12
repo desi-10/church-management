@@ -6,20 +6,22 @@ import { validateRequestFormData } from "@/utils/validator-helper";
 import { TypeofAttendanceData } from "@/validators/attendance";
 
 export const GET = asyncHandler(
-  async (req: Request, { params }: { params: { id: string } }) => {
-    const result = await attendanceService.getAttendanceById(params.id);
+  async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params;
+    const result = await attendanceService.getAttendanceById(id);
     return NextResponse.json(result);
   }
 );
 
 export const PUT = asyncHandler(
-  async (req: Request, { params }: { params: { id: string } }) => {
+  async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params;
     const data = await validateRequestFormData(
       req,
       AttendanceDataSchema.partial()
     );
     const result = await attendanceService.updateAttendance(
-      params.id,
+      id,
       data as Partial<TypeofAttendanceData>
     );
     return NextResponse.json(result);
@@ -27,8 +29,9 @@ export const PUT = asyncHandler(
 );
 
 export const DELETE = asyncHandler(
-  async (req: Request, { params }: { params: { id: string } }) => {
-    const result = await attendanceService.deleteAttendance(params.id);
+  async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params;
+    const result = await attendanceService.deleteAttendance(id);
     return NextResponse.json(result);
   }
 );
