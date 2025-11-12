@@ -6,6 +6,7 @@ import { admin } from "better-auth/plugins";
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL as string,
+  secret: process.env.BETTER_AUTH_SECRET as string,
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
@@ -18,7 +19,7 @@ export const auth = betterAuth({
   //   },
   // },
   database: prismaAdapter(prisma, {
-    provider: "sqlite",
+    provider: "postgresql",
   }),
   plugins: [
     nextCookies(),
