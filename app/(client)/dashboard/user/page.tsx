@@ -6,32 +6,28 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ExportButtons } from "@/components/export-buttons";
 import AddUser from "@/components/dialogs/users/add-user";
 import { columns } from "@/columns/user";
+import { Pagination } from "@/components/pagination";
 
 const UsersPage = () => {
   const [users, setUsers] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const response = await axios.get("/api/user");
-      const data = response.data;
-      setUsers(data);
-      // const { data: users, error } = await authClient.admin.listUsers({
-      //     query: {
-      //         searchValue: "some name",
-      //         searchField: "name",
-      //         searchOperator: "contains",
-      //         limit: 100,
-      //         offset: 100,
-      //         sortBy: "name",
-      //         sortDirection: "desc",
-      //         filterField: "email",
-      //         filterValue: "hello@example.com",
-      //         filterOperator: "eq",
-      //     },
-      // });
+      setIsLoading(true);
+      try {
+        const response = await axios.get(`/api/user?page=${page}&limit=10`);
+        const data = response.data;
+        setUsers(data);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchUsers();
-  }, []);
+  }, [page]);
 
   return (
     <div>
@@ -60,7 +56,19 @@ const UsersPage = () => {
 
       <div className="w-full">
         {users ? (
-          <DataTable data={users.data.users || []} columns={columns} />
+          <>
+            <DataTable data={users.data.users || []} columns={columns} />
+            {users.data.pagination && (
+              <Pagination
+                page={users.data.pagination.page}
+                totalPages={users.data.pagination.totalPages}
+                hasNextPage={users.data.pagination.hasNextPage}
+                hasPrevPage={users.data.pagination.hasPrevPage}
+                onPageChange={(newPage) => setPage(newPage)}
+                isLoading={isLoading}
+              />
+            )}
+          </>
         ) : (
           <div className="text-xs">
             <div className="rounded-md">

@@ -50,7 +50,7 @@ const AddSMS = () => {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        const response = await axios.get("/api/member");
+        const response = await axios.get("/api/member?page=1&limit=1000");
         if (response.data.success) {
           const membersWithPhone = response.data.data.members.filter(
             (m: any) => m.phone

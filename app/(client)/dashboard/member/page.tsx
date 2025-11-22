@@ -1,24 +1,55 @@
 "use client";
 import { DataTable } from "@/components/data-table";
 import AddMember from "@/components/dialogs/members/add.member";
+import EditMember from "@/components/dialogs/members/edit.member";
+import DeleteMember from "@/components/dialogs/members/delete.member";
 import { useEffect, useState } from "react";
 import { columns } from "@/columns/members";
 import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExportButtons } from "@/components/export-buttons";
+import { Pagination } from "@/components/pagination";
 
 const MembersPage = () => {
   const [members, setMembers] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<any>(null);
 
-  const fetchMembers = async () => {
-    const response = await axios.get("/api/member");
-    const data = response.data;
-    setMembers(data);
+  const fetchMembers = async (currentPage: number) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(
+        `/api/member?page=${currentPage}&limit=10`
+      );
+      const data = response.data;
+      setMembers(data);
+    } catch (error) {
+      console.error("Error fetching members:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchMembers();
-  }, []);
+    fetchMembers(page);
+  }, [page]);
+
+  const handleEdit = (member: any) => {
+    setSelectedMember(member);
+    setEditDialogOpen(true);
+  };
+
+  const handleDelete = (member: any) => {
+    setSelectedMember(member);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleSuccess = () => {
+    fetchMembers(page);
+  };
 
   return (
     <div>
@@ -47,7 +78,26 @@ const MembersPage = () => {
 
       <div className="w-full">
         {members ? (
-          <DataTable data={members.data.members || []} columns={columns} />
+          <>
+            <DataTable
+              data={members.data.members || []}
+              columns={columns}
+              meta={{
+                onEdit: handleEdit,
+                onDelete: handleDelete,
+              }}
+            />
+            {members.data.pagination && (
+              <Pagination
+                page={members.data.pagination.page}
+                totalPages={members.data.pagination.totalPages}
+                hasNextPage={members.data.pagination.hasNextPage}
+                hasPrevPage={members.data.pagination.hasPrevPage}
+                onPageChange={(newPage) => setPage(newPage)}
+                isLoading={isLoading}
+              />
+            )}
+          </>
         ) : (
           <div className="text-xs">
             <div className="rounded-md">
@@ -103,6 +153,23 @@ const MembersPage = () => {
           </div>
         )}
       </div>
+
+      {selectedMember && (
+        <>
+          <EditMember
+            open={editDialogOpen}
+            onOpenChange={setEditDialogOpen}
+            member={selectedMember}
+            onSuccess={handleSuccess}
+          />
+          <DeleteMember
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+            member={selectedMember}
+            onSuccess={handleSuccess}
+          />
+        </>
+      )}
     </div>
   );
 };

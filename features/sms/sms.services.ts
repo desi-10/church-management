@@ -44,19 +44,34 @@ export const sendSMS = async (smsData: TypeofSMSData) => {
   return apiResponse("SMS sent successfully", null);
 };
 
-export const getScheduledSMS = async () => {
+export const getScheduledSMS = async (page: number = 1, limit: number = 10) => {
   const scheduledSMS = await prisma.scheduledSMS.findMany({
     orderBy: {
       scheduledFor: "desc",
     },
+    skip: (page - 1) * limit,
+    take: limit,
   });
+
+  const totalSMS = await prisma.scheduledSMS.count();
+  const totalPages = Math.ceil(totalSMS / limit);
+  const hasNextPage = page < totalPages;
+  const hasPrevPage = page > 1;
 
   const formatted = scheduledSMS.map((sms) => ({
     ...sms,
     recipients: JSON.parse(sms.recipients),
   }));
 
-  return apiResponse("Scheduled SMS fetched successfully", formatted);
+  return apiResponse("Scheduled SMS fetched successfully", {
+    sms: formatted,
+    pagination: {
+      page,
+      totalPages,
+      hasNextPage,
+      hasPrevPage,
+    },
+  });
 };
 
 export const getScheduledSMSById = async (id: string) => {

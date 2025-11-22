@@ -3,8 +3,11 @@ import { useState, useEffect } from "react";
 import { columns } from "@/columns/attendance";
 import { DataTable } from "@/components/data-table";
 import AddAttendance from "@/components/dialogs/attendance/add.attendance";
+import EditAttendance from "@/components/dialogs/attendance/edit.attendance";
+import DeleteAttendance from "@/components/dialogs/attendance/delete.attendance";
 import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Pagination } from "@/components/pagination";
 
 type Attendance = {
   id: string;
@@ -17,15 +20,42 @@ type Attendance = {
 
 const AttendancePage = () => {
   const [attendances, setAttendances] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedAttendance, setSelectedAttendance] = useState<any>(null);
 
-  useEffect(() => {
-    const fetchAttendances = async () => {
-      const response = await axios.get("/api/attendance");
+  const fetchAttendances = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`/api/attendance?page=${page}&limit=10`);
       const data = response.data;
       setAttendances(data);
-    };
+    } catch (error) {
+      console.error("Error fetching attendances:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchAttendances();
-  }, []);
+  }, [page]);
+
+  const handleEdit = (attendance: any) => {
+    setSelectedAttendance(attendance);
+    setEditDialogOpen(true);
+  };
+
+  const handleDelete = (attendance: any) => {
+    setSelectedAttendance(attendance);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleSuccess = () => {
+    fetchAttendances();
+  };
 
   return (
     <div>
@@ -42,10 +72,26 @@ const AttendancePage = () => {
 
       <div className="w-full">
         {attendances ? (
-          <DataTable
-            data={attendances.data.attendances || []}
-            columns={columns}
-          />
+          <>
+            <DataTable
+              data={attendances.data.attendances || []}
+              columns={columns}
+              meta={{
+                onEdit: handleEdit,
+                onDelete: handleDelete,
+              }}
+            />
+            {attendances.data.pagination && (
+              <Pagination
+                page={attendances.data.pagination.page}
+                totalPages={attendances.data.pagination.totalPages}
+                hasNextPage={attendances.data.pagination.hasNextPage}
+                hasPrevPage={attendances.data.pagination.hasPrevPage}
+                onPageChange={(newPage) => setPage(newPage)}
+                isLoading={isLoading}
+              />
+            )}
+          </>
         ) : (
           <div className="text-xs">
             <div className="rounded-md">
@@ -96,6 +142,23 @@ const AttendancePage = () => {
           </div>
         )}
       </div>
+
+      {selectedAttendance && (
+        <>
+          <EditAttendance
+            open={editDialogOpen}
+            onOpenChange={setEditDialogOpen}
+            attendance={selectedAttendance}
+            onSuccess={handleSuccess}
+          />
+          <DeleteAttendance
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+            attendance={selectedAttendance}
+            onSuccess={handleSuccess}
+          />
+        </>
+      )}
     </div>
   );
 };

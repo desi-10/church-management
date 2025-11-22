@@ -71,34 +71,17 @@ export const columns: ColumnDef<AttendanceTable>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const data = row.original;
+      const meta = table.options.meta as any;
 
       return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button
             variant="outline"
             size="sm"
-            className="text-blue-500 hover:bg-blue-500 hover:text-white"
-            onClick={() => {
-              const event = new CustomEvent("openAttendanceDialog", {
-                detail: { mode: "view", attendance: data },
-              });
-              window.dispatchEvent(event);
-            }}
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-emerald-500 hover:bg-emerald-500 hover:text-white"
-            onClick={() => {
-              const event = new CustomEvent("openAttendanceDialog", {
-                detail: { mode: "edit", attendance: data },
-              });
-              window.dispatchEvent(event);
-            }}
+            className="text-emerald-500 hover:bg-emerald-600 hover:text-white"
+            onClick={() => meta?.onEdit?.(data)}
           >
             <Edit2 className="h-4 w-4" />
           </Button>
@@ -106,12 +89,7 @@ export const columns: ColumnDef<AttendanceTable>[] = [
             variant="outline"
             size="sm"
             className="text-rose-500 hover:bg-rose-500 hover:text-white"
-            onClick={() => {
-              const event = new CustomEvent("openAttendanceDialog", {
-                detail: { mode: "delete", attendance: data },
-              });
-              window.dispatchEvent(event);
-            }}
+            onClick={() => meta?.onDelete?.(data)}
           >
             <Trash className="h-4 w-4" />
           </Button>

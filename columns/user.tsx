@@ -78,30 +78,28 @@ export const columns: ColumnDef<UserTable>[] = [
 
   {
     id: "actions",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-primary hover:bg-blue-700 hover:text-white"
-        >
-          <Eye className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-emerald-500 hover:bg-emerald-600 hover:text-white"
-        >
-          <Edit2 className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-rose-500 hover:bg-rose-500 hover:text-white"
-        >
-          <Trash className="h-4 w-4" />
-        </Button>
-      </div>
-    ),
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as any;
+      return (
+        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-emerald-500 hover:bg-emerald-600 hover:text-white"
+            onClick={() => meta?.onEdit?.(row.original)}
+          >
+            <Edit2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-rose-500 hover:bg-rose-500 hover:text-white"
+            onClick={() => meta?.onDelete?.(row.original)}
+          >
+            <Trash className="h-4 w-4" />
+          </Button>
+        </div>
+      );
+    },
   },
 ];

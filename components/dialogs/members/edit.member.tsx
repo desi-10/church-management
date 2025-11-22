@@ -6,18 +6,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
-import { Loader2, Plus, User, Upload } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Controller, useForm } from "react-hook-form";
-import { MemberDataSchema, TypeofMemberData } from "@/validators/members";
-import { zodResolver } from "@hookform/resolvers/zod";
-import axios, { AxiosError } from "axios";
-import { toast } from "sonner";
-import Image from "next/image";
 import {
   Select,
   SelectContent,
@@ -25,11 +18,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Controller, useForm } from "react-hook-form";
+import { MemberDataSchema, TypeofMemberData } from "@/validators/members";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios, { AxiosError } from "axios";
+import { toast } from "sonner";
+import Image from "next/image";
 
-const AddMember = () => {
-  const [open, setOpen] = useState(false);
+interface EditMemberProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  member: any;
+  onSuccess?: () => void;
+}
+
+const EditMember = ({
+  open,
+  onOpenChange,
+  member,
+  onSuccess,
+}: EditMemberProps) => {
   const [preview, setPreview] = useState<string | null>(null);
-  const [members, setMembers] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
   const {
     register,
@@ -38,6 +47,7 @@ const AddMember = () => {
     control,
     formState: { errors, isSubmitting },
     reset,
+    setValue,
   } = useForm<TypeofMemberData>({
     resolver: zodResolver(MemberDataSchema),
   });
@@ -45,12 +55,22 @@ const AddMember = () => {
   const imageFile = watch("image");
 
   useEffect(() => {
+    if (member && open) {
+      setValue("firstName", member.firstName || "");
+      setValue("lastName", member.lastName || "");
+      setValue("email", member.email || "");
+      setValue("phone", member.phone || "");
+      setValue("address", member.address || "");
+      setValue("userId", member.userId || "");
+      setPreview(member.image || null);
+    }
+  }, [member, open, setValue]);
+
+  useEffect(() => {
     if (imageFile && typeof imageFile === "object" && "name" in imageFile) {
       const reader = new FileReader();
       reader.onloadend = () => setPreview(reader.result as string);
       reader.readAsDataURL(imageFile);
-    } else {
-      setPreview(null);
     }
   }, [imageFile]);
 
@@ -68,46 +88,50 @@ const AddMember = () => {
       }
     };
 
-    fetchUsers();
-  }, []);
+    if (open) {
+      fetchUsers();
+    }
+  }, [open]);
 
   const onSubmit = async (data: TypeofMemberData) => {
     try {
       const formData = new FormData();
       for (const key in data) {
-        formData.append(key, (data as any)[key]);
+        const value = (data as any)[key];
+        if (value !== undefined && value !== null) {
+          formData.append(key, value);
+        }
       }
 
-      const { data: response } = await axios.post("/api/member", formData);
-      if (response.success) toast.success(response.message);
-
-      setOpen(false);
-      reset();
-      setPreview(null);
+      const { data: response } = await axios.put(
+        `/api/member/${member.id}`,
+        formData
+      );
+      if (response.success) {
+        toast.success(response.message);
+        onSuccess?.();
+        onOpenChange(false);
+        reset();
+        setPreview(null);
+      }
     } catch (err) {
       if (err instanceof AxiosError) {
         toast.error(
           err.response?.data.message ||
-            "Something went wrong while adding member."
+            "Something went wrong while updating member."
         );
       } else {
-        toast.error("Something went wrong while adding member.");
+        toast.error("Something went wrong while updating member.");
       }
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Button className="bg-primary hover:bg-primary/90">
-          <Plus className="h-4 w-4 mr-1" /> Add Member
-        </Button>
-      </DialogTrigger>
-
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 mb-4">
-            <span className="font-bold">Add Member</span>
+            <span className="font-bold">Edit Member</span>
           </DialogTitle>
         </DialogHeader>
 
@@ -132,14 +156,14 @@ const AddMember = () => {
               </div>
 
               <label
-                htmlFor="image"
+                htmlFor="edit-image"
                 className="cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-800 transition"
               >
                 Upload Image
               </label>
               <Input
                 type="file"
-                id="image"
+                id="edit-image"
                 accept="image/*"
                 className="hidden"
                 {...register("image")}
@@ -148,7 +172,6 @@ const AddMember = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            {/* Other Inputs */}
             <div className="grid gap-2">
               <Label htmlFor="firstName">First Name</Label>
               <Input
@@ -205,19 +228,20 @@ const AddMember = () => {
           </div>
 
           <div className="col-span-2 w-full">
-            <Label htmlFor="memberId">Users (Optional)</Label>
+            <Label htmlFor="userId">Users (Optional)</Label>
             <Controller
               name="userId"
               control={control}
               render={({ field }) => (
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value || ""}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select member" />
+                    <SelectValue placeholder="Select user" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="None">None</SelectItem>
                     {users?.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user?.name}
@@ -231,16 +255,21 @@ const AddMember = () => {
 
           <DialogFooter>
             <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button
               type="submit"
-              className="w-full bg-primary hover:bg-primary/90"
+              className="bg-primary-color hover:bg-blue-700 text-white"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-              ) : (
-                <Plus className="h-4 w-4 mr-1" />
-              )}
-              {isSubmitting ? "Adding Member..." : "Add Member"}
+              ) : null}
+              {isSubmitting ? "Updating..." : "Update Member"}
             </Button>
           </DialogFooter>
         </form>
@@ -249,4 +278,4 @@ const AddMember = () => {
   );
 };
 
-export default AddMember;
+export default EditMember;

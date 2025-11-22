@@ -5,37 +5,48 @@ export const sendArkeselSMS = async (
   message: string,
   scheduledFor?: Date
 ) => {
-  const apiKey = process.env.ARKESEL_API_KEY;
-  const senderId = "CAW-HO"; // Replace with your approved SenderID
+  const apiKey = process.env.ARKESEL_API_KEY; // 🔥 Must be correct
+  const senderId = process.env.ARKESEL_SENDER_ID; // 🔥 Must be approved
 
-  const params: any = {
-    api_key: apiKey,
-    to: recipients.join(","), // comma-separated numbers
-    from: senderId,
-    sms: message,
-  };
-
-  if (scheduledFor) {
-    // Format as YYYY-MM-DD HH:mm (Arkesel schedule format)
-    const year = scheduledFor.getFullYear();
-    const month = String(scheduledFor.getMonth() + 1).padStart(2, "0");
-    const day = String(scheduledFor.getDate()).padStart(2, "0");
-    const hours = String(scheduledFor.getHours()).padStart(2, "0");
-    const minutes = String(scheduledFor.getMinutes()).padStart(2, "0");
-    params.schedule = `${year}-${month}-${day} ${hours}:${minutes}`;
+  if (!apiKey || !senderId) {
+    throw new Error("Arkesel API Key or Sender ID is missing in environment");
   }
 
-  const url = "https://sms.arkesel.com/sms/api";
+  const payload: any = {
+    sender: senderId,
+    message: message,
+    recipients: recipients,
+  };
+
+  // Handle scheduling — Arkesel format: YYYY-MM-DD HH:mm
+  if (scheduledFor) {
+    const y = scheduledFor.getFullYear();
+    const m = String(scheduledFor.getMonth() + 1).padStart(2, "0");
+    const d = String(scheduledFor.getDate()).padStart(2, "0");
+    const hh = String(scheduledFor.getHours()).padStart(2, "0");
+    const mm = String(scheduledFor.getMinutes()).padStart(2, "0");
+
+    payload.schedule = `${y}-${m}-${d} ${hh}:${mm}`;
+  }
 
   try {
-    const response = await axios.get(url, { params });
-    if (response.data.includes("success")) {
-      return response.data;
-    } else {
-      throw new Error(JSON.stringify(response.data));
-    }
+    const response = await axios.post(
+      "https://sms.arkesel.com/api/v2/sms/send",
+      payload,
+      {
+        headers: {
+          "api-key": apiKey,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
   } catch (err: any) {
-    console.error("Arkesel SMS Error:", err.response?.data || err.message);
+    console.error(
+      "Arkesel SMS Error:",
+      err.response?.data || err.message
+    );
     throw new Error("Failed to send SMS via Arkesel");
   }
 };

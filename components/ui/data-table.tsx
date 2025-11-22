@@ -39,10 +39,6 @@ import { toast } from "sonner";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  meta?: {
-    onEdit?: (row: TData) => void;
-    onDelete?: (row: TData) => void;
-  };
 }
 
 type TRows = {
@@ -52,7 +48,6 @@ type TRows = {
 export function DataTable<TData, TValue>({
   columns,
   data,
-  meta,
 }: DataTableProps<TData, TValue>) {
   const [filtering, setFiltering] = useState("");
 
@@ -72,7 +67,6 @@ export function DataTable<TData, TValue>({
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     onGlobalFilterChange: setFiltering,
-    meta,
     state: {
       sorting,
       columnFilters,
@@ -190,7 +184,6 @@ export function DataTable<TData, TValue>({
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
-                    className="group"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>

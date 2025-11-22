@@ -6,10 +6,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
-import { Loader2, Plus, Wallet } from "lucide-react";
+import { Loader2, Wallet } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,8 +24,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 
-const AddFinance = () => {
-  const [open, setOpen] = useState(false);
+interface EditFinanceProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  finance: any;
+  onSuccess?: () => void;
+}
+
+const EditFinance = ({
+  open,
+  onOpenChange,
+  finance,
+  onSuccess,
+}: EditFinanceProps) => {
   const [members, setMembers] = useState<any[]>([]);
   const {
     register,
@@ -34,12 +44,34 @@ const AddFinance = () => {
     control,
     formState: { errors, isSubmitting },
     reset,
+    setValue,
   } = useForm<TypeofFinanceData>({
     resolver: zodResolver(FinanceDataSchema),
   });
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    if (finance && open) {
+      setValue("type", finance.type);
+      setValue("amount", finance.amount);
+      setValue("currency", finance.currency || "GHS");
+      setValue("paymentType", finance.paymentType || "CASH");
+      setValue("status", finance.status || "COMPLETED");
+      setValue("memberId", finance.memberId || "");
+      setValue("firstname", finance.firstname || "");
+      setValue("lastname", finance.lastname || "");
+      setValue("category", finance.category || "");
+      setValue("description", finance.description || "");
+      setValue("reference", finance.reference || "");
+      setValue("notes", finance.notes || "");
+      if (finance.date) {
+        const date = new Date(finance.date);
+        setValue("date", date);
+      }
+    }
+  }, [finance, open, setValue]);
+
+  useEffect(() => {
+    const fetchMembers = async () => {
       try {
         const { data } = await axios.get("/api/member?page=1&limit=1000");
         setMembers(data.data.members);
@@ -47,42 +79,40 @@ const AddFinance = () => {
         console.error("Failed to fetch members:", error);
       }
     };
-    fetchUsers();
-  }, []);
+
+    if (open) {
+      fetchMembers();
+    }
+  }, [open]);
 
   const onSubmit = async (data: TypeofFinanceData) => {
     try {
-      const { data: response } = await axios.post("/api/finance", data);
-      if (response.success) toast.success(response.message);
-
-      setOpen(false);
-      reset();
-      // window.location.reload();
+      const { data: response } = await axios.put(`/api/finance/${finance.id}`, data);
+      if (response.success) {
+        toast.success(response.message);
+        onSuccess?.();
+        onOpenChange(false);
+        reset();
+      }
     } catch (err) {
       if (err instanceof AxiosError) {
         toast.error(
           err.response?.data.message ||
-            "Something went wrong while adding finance."
+            "Something went wrong while updating finance."
         );
       } else {
-        toast.error("Something went wrong while adding finance.");
+        toast.error("Something went wrong while updating finance.");
       }
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-primary hover:bg-primary/90">
-          <Plus className="h-4 w-4 mr-1" /> Add Finance
-        </Button>
-      </DialogTrigger>
-
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Wallet className="h-5 w-5" />
-            <span>Add Finance</span>
+            <span>Edit Finance</span>
           </DialogTitle>
         </DialogHeader>
 
@@ -94,14 +124,12 @@ const AddFinance = () => {
                 name="memberId"
                 control={control}
                 render={({ field }) => (
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select member" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="">None</SelectItem>
                       {members?.map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {member.firstName} {member.lastName}
@@ -118,10 +146,7 @@ const AddFinance = () => {
                 name="type"
                 control={control}
                 render={({ field }) => (
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
@@ -161,10 +186,7 @@ const AddFinance = () => {
                 name="currency"
                 control={control}
                 render={({ field }) => (
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select currency" />
                     </SelectTrigger>
@@ -184,10 +206,7 @@ const AddFinance = () => {
                 name="paymentType"
                 control={control}
                 render={({ field }) => (
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select payment" />
                     </SelectTrigger>
@@ -243,7 +262,10 @@ const AddFinance = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="date">Date</Label>
-              <Input type="date" {...register("date")} />
+              <Input
+                type="date"
+                {...register("date", { valueAsDate: true })}
+              />
             </div>
 
             <div className="grid gap-2">
@@ -256,23 +278,23 @@ const AddFinance = () => {
             </div>
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="notes">Notes (Optional)</Label>
-            {/* <Textarea placeholder="Notes" {...register("notes")} /> */}
-          </div>
-
           <DialogFooter>
             <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button
               type="submit"
-              className="w-full bg-primary hover:bg-primary/90"
+              className="bg-primary-color hover:bg-blue-700 text-white"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-              ) : (
-                <Plus className="h-4 w-4 mr-1" />
-              )}
-              {isSubmitting ? "Adding..." : "Add Transaction"}
+              ) : null}
+              {isSubmitting ? "Updating..." : "Update Transaction"}
             </Button>
           </DialogFooter>
         </form>
@@ -281,4 +303,5 @@ const AddFinance = () => {
   );
 };
 
-export default AddFinance;
+export default EditFinance;
+

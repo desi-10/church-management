@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { Pagination } from "@/components/pagination";
 
 type SMS = {
   id: string;
@@ -22,16 +23,25 @@ type SMS = {
 
 const SMSPage = () => {
   const [sms, setSMS] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const fetchSMS = async () => {
-    const response = await axios.get("/api/sms");
-    const data = response.data;
-    setSMS(data);
+  const fetchSMS = async (currentPage: number) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`/api/sms?page=${currentPage}&limit=10`);
+      const data = response.data;
+      setSMS(data);
+    } catch (error) {
+      console.error("Error fetching SMS:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchSMS();
-  }, []);
+    fetchSMS(page);
+  }, [page]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this scheduled SMS?")) return;
@@ -40,7 +50,7 @@ const SMSPage = () => {
       const response = await axios.delete(`/api/sms/${id}`);
       if (response.data.success) {
         toast.success(response.data.message);
-        fetchSMS();
+        fetchSMS(page);
       }
     } catch (error) {
       toast.error("Failed to delete SMS");
@@ -149,7 +159,19 @@ const SMSPage = () => {
 
       <div className="w-full">
         {sms ? (
-          <DataTable data={sms.data || []} columns={columns} />
+          <>
+            <DataTable data={sms.data.sms || []} columns={columns} />
+            {sms.data.pagination && (
+              <Pagination
+                page={sms.data.pagination.page}
+                totalPages={sms.data.pagination.totalPages}
+                hasNextPage={sms.data.pagination.hasNextPage}
+                hasPrevPage={sms.data.pagination.hasPrevPage}
+                onPageChange={(newPage) => setPage(newPage)}
+                isLoading={isLoading}
+              />
+            )}
+          </>
         ) : (
           <div className="text-xs">
             <div className="rounded-md">
