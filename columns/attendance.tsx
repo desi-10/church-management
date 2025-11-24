@@ -5,6 +5,9 @@ import { ArrowUpDown, Edit2, Trash, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
+import { EditAttendanceDialog } from "@/components/dialogs/attendance/edit.attendance";
+import { DeleteAttendanceDialog } from "@/components/dialogs/attendance/delete.attendance";
+import { useState } from "react";
 
 type AttendanceTable = {
   id: string;
@@ -71,29 +74,46 @@ export const columns: ColumnDef<AttendanceTable>[] = [
   },
   {
     id: "actions",
-    cell: ({ row, table }) => {
+    cell: ({ row }) => {
       const data = row.original;
-      const meta = table.options.meta as any;
+      const [editOpen, setEditOpen] = useState(false);
+      const [deleteOpen, setDeleteOpen] = useState(false);
 
       return (
-        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-emerald-500 hover:bg-emerald-600 hover:text-white"
-            onClick={() => meta?.onEdit?.(data)}
-          >
-            <Edit2 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-rose-500 hover:bg-rose-500 hover:text-white"
-            onClick={() => meta?.onDelete?.(data)}
-          >
-            <Trash className="h-4 w-4" />
-          </Button>
-        </div>
+        <>
+          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-emerald-500 hover:bg-emerald-600 hover:text-white"
+              onClick={() => setEditOpen(true)}
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-rose-500 hover:bg-rose-500 hover:text-white"
+              onClick={() => setDeleteOpen(true)}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
+          {editOpen && (
+            <EditAttendanceDialog
+              attendance={data}
+              open={editOpen}
+              onOpenChange={setEditOpen}
+            />
+          )}
+          {deleteOpen && (
+            <DeleteAttendanceDialog
+              attendance={data}
+              open={deleteOpen}
+              onOpenChange={setDeleteOpen}
+            />
+          )}
+        </>
       );
     },
     enableHiding: false,

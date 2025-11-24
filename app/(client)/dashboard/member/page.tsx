@@ -1,8 +1,6 @@
 "use client";
 import { DataTable } from "@/components/data-table";
 import AddMember from "@/components/dialogs/members/add.member";
-import EditMember from "@/components/dialogs/members/edit.member";
-import DeleteMember from "@/components/dialogs/members/delete.member";
 import { useEffect, useState } from "react";
 import { columns } from "@/columns/members";
 import axios from "axios";
@@ -14,9 +12,6 @@ const MembersPage = () => {
   const [members, setMembers] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedMember, setSelectedMember] = useState<any>(null);
 
   const fetchMembers = async (currentPage: number) => {
     setIsLoading(true);
@@ -36,20 +31,6 @@ const MembersPage = () => {
   useEffect(() => {
     fetchMembers(page);
   }, [page]);
-
-  const handleEdit = (member: any) => {
-    setSelectedMember(member);
-    setEditDialogOpen(true);
-  };
-
-  const handleDelete = (member: any) => {
-    setSelectedMember(member);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleSuccess = () => {
-    fetchMembers(page);
-  };
 
   return (
     <div>
@@ -79,14 +60,7 @@ const MembersPage = () => {
       <div className="w-full">
         {members ? (
           <>
-            <DataTable
-              data={members.data.members || []}
-              columns={columns}
-              meta={{
-                onEdit: handleEdit,
-                onDelete: handleDelete,
-              }}
-            />
+            <DataTable data={members.data.members || []} columns={columns} />
             {members.data.pagination && (
               <Pagination
                 page={members.data.pagination.page}
@@ -153,23 +127,6 @@ const MembersPage = () => {
           </div>
         )}
       </div>
-
-      {selectedMember && (
-        <>
-          <EditMember
-            open={editDialogOpen}
-            onOpenChange={setEditDialogOpen}
-            member={selectedMember}
-            onSuccess={handleSuccess}
-          />
-          <DeleteMember
-            open={deleteDialogOpen}
-            onOpenChange={setDeleteDialogOpen}
-            member={selectedMember}
-            onSuccess={handleSuccess}
-          />
-        </>
-      )}
     </div>
   );
 };

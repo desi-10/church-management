@@ -11,7 +11,7 @@ type UserTable = {
   name: string;
   email: string;
   role?: string | null;
-  image?: any | null;
+  image?: string | null;
 };
 
 export const columns: ColumnDef<UserTable>[] = [
@@ -43,7 +43,7 @@ export const columns: ColumnDef<UserTable>[] = [
     header: "Image",
     cell: ({ row }) => (
       <Image
-        src={row.original.image || null}
+        src={row.original.image || "/placeholder.png"}
         alt="Image"
         width={40}
         height={40}

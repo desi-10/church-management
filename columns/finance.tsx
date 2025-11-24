@@ -5,6 +5,9 @@ import { ArrowUpDown, Edit2, Trash, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
+import { EditFinanceDialog } from "@/components/dialogs/finance/edit.finance";
+import { DeleteFinanceDialog } from "@/components/dialogs/finance/delete.finance";
+import { useState } from "react";
 
 type FinanceTable = {
   id: string;
@@ -143,27 +146,46 @@ export const columns: ColumnDef<FinanceTable>[] = [
   },
   {
     id: "actions",
-    cell: ({ row, table }) => {
-      const meta = table.options.meta as any;
+    cell: ({ row }) => {
+      const data = row.original;
+      const [editOpen, setEditOpen] = useState(false);
+      const [deleteOpen, setDeleteOpen] = useState(false);
+
       return (
-        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-emerald-500 hover:bg-emerald-600 hover:text-white"
-            onClick={() => meta?.onEdit?.(row.original)}
-          >
-            <Edit2 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-rose-500 hover:bg-rose-500 hover:text-white"
-            onClick={() => meta?.onDelete?.(row.original)}
-          >
-            <Trash className="h-4 w-4" />
-          </Button>
-        </div>
+        <>
+          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-emerald-500 hover:bg-emerald-600 hover:text-white"
+              onClick={() => setEditOpen(true)}
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-rose-500 hover:bg-rose-500 hover:text-white"
+              onClick={() => setDeleteOpen(true)}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
+          {editOpen && (
+            <EditFinanceDialog
+              finance={data}
+              open={editOpen}
+              onOpenChange={setEditOpen}
+            />
+          )}
+          {deleteOpen && (
+            <DeleteFinanceDialog
+              finance={data}
+              open={deleteOpen}
+              onOpenChange={setDeleteOpen}
+            />
+          )}
+        </>
       );
     },
   },

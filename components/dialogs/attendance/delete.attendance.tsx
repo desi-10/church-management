@@ -14,16 +14,16 @@ import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 
 interface DeleteAttendanceProps {
+  attendance: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  attendance: any;
   onSuccess?: () => void;
 }
 
-const DeleteAttendance = ({
+const DeleteAttendanceDialog = ({
+  attendance,
   open,
   onOpenChange,
-  attendance,
   onSuccess,
 }: DeleteAttendanceProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
@@ -54,7 +54,7 @@ const DeleteAttendance = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Delete Attendance</DialogTitle>
@@ -92,5 +92,5 @@ const DeleteAttendance = ({
   );
 };
 
-export default DeleteAttendance;
+export { DeleteAttendanceDialog };
 

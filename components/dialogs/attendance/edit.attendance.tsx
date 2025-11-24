@@ -28,16 +28,16 @@ import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 
 interface EditAttendanceProps {
+  attendance: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  attendance: any;
   onSuccess?: () => void;
 }
 
-const EditAttendance = ({
+const EditAttendanceDialog = ({
+  attendance,
   open,
   onOpenChange,
-  attendance,
   onSuccess,
 }: EditAttendanceProps) => {
   const [members, setMembers] = useState<any[]>([]);
@@ -53,18 +53,18 @@ const EditAttendance = ({
   });
 
   useEffect(() => {
-    if (attendance && open) {
+    if (attendance) {
       setValue("firstname", attendance.firstname || "");
       setValue("lastname", attendance.lastname || "");
       setValue("phone", attendance.phone || "");
       setValue("status", attendance.status || "PRESENT");
-      setValue("memberId", attendance.memberId || "");
+      setValue("memberId", attendance.memberId || "none");
       if (attendance.date) {
         const date = new Date(attendance.date);
         setValue("date", date.toISOString().split("T")[0]);
       }
     }
-  }, [attendance, open, setValue]);
+  }, [attendance, setValue]);
 
   useEffect(() => {
     const fetchMembers = async () => {
@@ -76,10 +76,8 @@ const EditAttendance = ({
       }
     };
 
-    if (open) {
-      fetchMembers();
-    }
-  }, [open]);
+    fetchMembers();
+  }, []);
 
   const onSubmit = async (data: TypeofAttendanceData) => {
     try {
@@ -87,7 +85,12 @@ const EditAttendance = ({
       for (const key in data) {
         const value = (data as any)[key];
         if (value !== undefined && value !== null) {
-          formData.append(key, value);
+          // Convert "none" back to empty string for memberId
+          if (key === "memberId" && value === "none") {
+            formData.append(key, "");
+          } else {
+            formData.append(key, value);
+          }
         }
       }
 
@@ -100,6 +103,7 @@ const EditAttendance = ({
         onSuccess?.();
         onOpenChange(false);
         reset();
+        window.location.reload();
       }
     } catch (err) {
       if (err instanceof AxiosError) {
@@ -132,7 +136,9 @@ const EditAttendance = ({
                 {...register("firstname")}
               />
               {errors.firstname && (
-                <p className="text-sm text-red-500">{errors.firstname.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.firstname.message}
+                </p>
               )}
             </div>
 
@@ -144,7 +150,9 @@ const EditAttendance = ({
                 {...register("lastname")}
               />
               {errors.lastname && (
-                <p className="text-sm text-red-500">{errors.lastname.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.lastname.message}
+                </p>
               )}
             </div>
           </div>
@@ -191,12 +199,15 @@ const EditAttendance = ({
               name="memberId"
               control={control}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value || ""}>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || "none"}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select member" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {members.map((member) => (
                       <SelectItem key={member.id} value={member.id}>
                         {member.firstName} {member.lastName}
@@ -233,5 +244,4 @@ const EditAttendance = ({
   );
 };
 
-export default EditAttendance;
-
+export { EditAttendanceDialog };

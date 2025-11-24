@@ -18,6 +18,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 // import Image from "next/image";
 import { authClient } from "@/lib/auth-client";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { AxiosError } from "axios";
 
 const AddUser = () => {
   const [open, setOpen] = useState(false);
@@ -27,6 +35,7 @@ const AddUser = () => {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<TypeUserData>({
@@ -36,19 +45,34 @@ const AddUser = () => {
   //   const imageFile = watch("image");
 
   const onSubmit = async (data: TypeUserData) => {
-    const { data: newUser, error } = await authClient.admin.createUser({
-      email: data.email, // required
-      password: data.password, // required
-      name: data.name, // required
-      role: "user",
-      data: { customField: "customValue" },
-    });
+    await authClient.admin.createUser(
+      {
+        email: data.email,
+        password: data.password,
+        name: data.name,
+        role: data.role,
+      },
+      {
+        onSuccess: () => {
+          toast.success("User added successfully");
+          setOpen(false);
+          reset();
+        },
+        onError: (error) => {
+          if (error instanceof AxiosError) {
+            toast.error(error.response?.data?.message || "Failed to add user");
+          } else {
+            toast.error("Something went wrong");
+          }
+        },
+      }
+    );
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-primary-color hover:bg-blue-700 text-white">
+        <Button className="bg-primary hover:bg-primary/90">
           <Plus className="h-4 w-4 mr-1" /> Add User
         </Button>
       </DialogTrigger>
@@ -125,10 +149,28 @@ const AddUser = () => {
             )}
           </div>
 
+          <div className="grid gap-2">
+            <Label htmlFor="role">Role</Label>
+            <Select
+              onValueChange={(value) =>
+                setValue("role", value as "admin" | "user")
+              }
+              defaultValue={watch("role") as "admin" | "user"}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="user">User</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <DialogFooter>
             <Button
               type="submit"
-              className="w-full bg-primary-color hover:bg-blue-700 text-white"
+              className="w-full bg-primary hover:bg-primary/90"
               disabled={isSubmitting}
             >
               {isSubmitting ? (

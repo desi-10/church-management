@@ -8,6 +8,7 @@ import {
   Users,
   Wallet,
   MessageSquare,
+  User,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -58,6 +59,11 @@ const data = {
       title: "Users",
       url: "/dashboard/user",
       icon: Users,
+    },
+    {
+      title: "Profile",
+      url: "/dashboard/profile",
+      icon: User,
     },
   ],
 };

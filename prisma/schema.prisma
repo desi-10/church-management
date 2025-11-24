@@ -6,13 +6,13 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
-  id            String    @id
+  id            String    @id @default(cuid())
   name          String
   email         String
+  password      String?
   emailVerified Boolean
   image         String?
   createdAt     DateTime
@@ -26,14 +26,14 @@ model User {
   banReason  String?
   banExpires DateTime?
 
-   approvedFinances Finance[]    @relation("FinanceApprovedBy")
+  approvedFinances Finance[]    @relation("FinanceApprovedBy")
 
   @@unique([email])
   @@map("user")
 }
 
 model Session {
-  id        String   @id
+  id        String   @id @default(cuid())
   expiresAt DateTime
   token     String
   createdAt DateTime
@@ -51,7 +51,7 @@ model Session {
 
 model Account {
   id                    String    @id
-  accountId             String
+  accountId             String    @default(cuid())
   providerId            String
   userId                String
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -70,7 +70,7 @@ model Account {
 
 model Verification {
   id         String    @id
-  identifier String
+  identifier String    @default(cuid())
   value      String
   expiresAt  DateTime
   createdAt  DateTime?

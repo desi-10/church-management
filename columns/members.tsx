@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import Image from "next/image";
+import { EditMemberDialog } from "@/components/dialogs/members/edit.member";
+import { DeleteMemberDialog } from "@/components/dialogs/members/delete.member";
+import { useState } from "react";
 
 type MemberTable = {
   id: string;
@@ -14,7 +17,7 @@ type MemberTable = {
   email?: string;
   phone?: string;
   address?: string;
-  image?: any;
+  image?: string | null;
 };
 
 export const columns: ColumnDef<MemberTable>[] = [
@@ -90,29 +93,44 @@ export const columns: ColumnDef<MemberTable>[] = [
   },
   {
     id: "actions",
-    cell: ({ row, table }) => {
+    cell: ({ row }) => {
       const data = row.original;
-      const meta = table.options.meta as any;
+      const [editOpen, setEditOpen] = useState(false);
+      const [deleteOpen, setDeleteOpen] = useState(false);
 
       return (
-        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-emerald-500 hover:bg-emerald-600 hover:text-white"
-            onClick={() => meta?.onEdit?.(data)}
-          >
-            <Edit2 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-rose-500 hover:bg-rose-500 hover:text-white"
-            onClick={() => meta?.onDelete?.(data)}
-          >
-            <Trash className="h-4 w-4" />
-          </Button>
-        </div>
+        <>
+          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-emerald-500 hover:bg-emerald-600 hover:text-white"
+              onClick={() => setEditOpen(true)}
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-rose-500 hover:bg-rose-500 hover:text-white"
+              onClick={() => setDeleteOpen(true)}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <EditMemberDialog
+            member={data}
+            open={editOpen}
+            onOpenChange={setEditOpen}
+          />
+
+          <DeleteMemberDialog
+            member={data}
+            open={deleteOpen}
+            onOpenChange={setDeleteOpen}
+          />
+        </>
       );
     },
     enableHiding: false,

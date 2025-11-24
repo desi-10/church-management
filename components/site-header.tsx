@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ModeToggle } from "./mode-toggle";
@@ -27,6 +28,7 @@ const pageTitles: Record<string, string> = {
   "/dashboard/finance": "Finance",
   "/dashboard/sms": "Bulk SMS",
   "/dashboard/user": "Users",
+  "/dashboard/profile": "Profile",
 };
 
 const pageDescriptions: Record<string, string> = {
@@ -36,6 +38,7 @@ const pageDescriptions: Record<string, string> = {
   "/dashboard/finance": "Manage financial transactions and reports",
   "/dashboard/sms": "Send bulk SMS to members",
   "/dashboard/user": "Manage users and their permissions",
+  "/dashboard/profile": "View and edit your profile information",
 };
 
 export function SiteHeader() {
@@ -52,7 +55,8 @@ export function SiteHeader() {
       fetchOptions: {
         onSuccess: () => {
           toast.success("Signed out successfully");
-          router.push("/"); // redirect to login page
+          router.push("/");
+          window.location.reload();
         },
         onError: (error) => {
           toast.error(error.error.data?.message || "Something went wrong");
@@ -158,11 +162,8 @@ export function SiteHeader() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer">
-                Profile Settings
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
-                Preferences
+              <DropdownMenuItem asChild className="cursor-pointer">
+                <Link href="/dashboard/profile">Profile Settings</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

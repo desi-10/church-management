@@ -57,14 +57,21 @@ const AddMember = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const { data } = await axios.get("/api/user?page=1&limit=1000");
-        setUsers(data.data.users);
+        const response = await axios.get("/api/user?page=1&limit=1000");
+        if (response.data.success && response.data.data) {
+          setUsers(response.data.data.users || []);
+        } else {
+          console.error("Unexpected response structure:", response.data);
+          setUsers([]);
+        }
       } catch (error) {
+        console.error("Error fetching users:", error);
         if (error instanceof AxiosError) {
-          toast.error(error.response?.data.message);
+          toast.error(error.response?.data?.message || "Failed to fetch users");
         } else {
           toast.error("Something went wrong");
         }
+        setUsers([]);
       }
     };
 
@@ -75,7 +82,13 @@ const AddMember = () => {
     try {
       const formData = new FormData();
       for (const key in data) {
-        formData.append(key, (data as any)[key]);
+        const value = (data as any)[key];
+        // Convert "none" back to empty string for userId
+        if (key === "userId" && value === "none") {
+          formData.append(key, "");
+        } else {
+          formData.append(key, value);
+        }
       }
 
       const { data: response } = await axios.post("/api/member", formData);
@@ -205,24 +218,33 @@ const AddMember = () => {
           </div>
 
           <div className="col-span-2 w-full">
-            <Label htmlFor="memberId">Users (Optional)</Label>
+            <Label htmlFor="userId">Users (Optional)</Label>
             <Controller
               name="userId"
               control={control}
               render={({ field }) => (
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value || "none"}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select member" />
+                    <SelectValue placeholder="Select user" />
                   </SelectTrigger>
                   <SelectContent>
-                    {users?.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user?.name}
-                      </SelectItem>
-                    ))}
+                    {users && users.length > 0 ? (
+                      <>
+                        <SelectItem value="none">None</SelectItem>
+                        {users.map((user) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user?.name || user?.email || "Unknown User"}
+                          </SelectItem>
+                        ))}
+                      </>
+                    ) : (
+                      <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                        No users available
+                      </div>
+                    )}
                   </SelectContent>
                 </Select>
               )}

@@ -14,16 +14,16 @@ import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 
 interface DeleteMemberProps {
+  member: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  member: any;
   onSuccess?: () => void;
 }
 
-const DeleteMember = ({
+const DeleteMemberDialog = ({
+  member,
   open,
   onOpenChange,
-  member,
   onSuccess,
 }: DeleteMemberProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
@@ -90,4 +90,4 @@ const DeleteMember = ({
   );
 };
 
-export default DeleteMember;
+export { DeleteMemberDialog };

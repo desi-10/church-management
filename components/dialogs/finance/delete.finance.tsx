@@ -14,16 +14,16 @@ import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 
 interface DeleteFinanceProps {
+  finance: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  finance: any;
   onSuccess?: () => void;
 }
 
-const DeleteFinance = ({
+const DeleteFinanceDialog = ({
+  finance,
   open,
   onOpenChange,
-  finance,
   onSuccess,
 }: DeleteFinanceProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
@@ -52,7 +52,7 @@ const DeleteFinance = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Delete Transaction</DialogTitle>
@@ -66,7 +66,7 @@ const DeleteFinance = ({
           <Button
             type="button"
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={() => setOpen(false)}
             disabled={isDeleting}
           >
             Cancel
@@ -90,5 +90,5 @@ const DeleteFinance = ({
   );
 };
 
-export default DeleteFinance;
+export { DeleteFinanceDialog };
 

@@ -25,16 +25,16 @@ import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 
 interface EditFinanceProps {
+  finance: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  finance: any;
   onSuccess?: () => void;
 }
 
-const EditFinance = ({
+const EditFinanceDialog = ({
+  finance,
   open,
   onOpenChange,
-  finance,
   onSuccess,
 }: EditFinanceProps) => {
   const [members, setMembers] = useState<any[]>([]);
@@ -50,13 +50,13 @@ const EditFinance = ({
   });
 
   useEffect(() => {
-    if (finance && open) {
+    if (finance) {
       setValue("type", finance.type);
       setValue("amount", finance.amount);
       setValue("currency", finance.currency || "GHS");
       setValue("paymentType", finance.paymentType || "CASH");
       setValue("status", finance.status || "COMPLETED");
-      setValue("memberId", finance.memberId || "");
+      setValue("memberId", finance.memberId || "none");
       setValue("firstname", finance.firstname || "");
       setValue("lastname", finance.lastname || "");
       setValue("category", finance.category || "");
@@ -68,7 +68,7 @@ const EditFinance = ({
         setValue("date", date);
       }
     }
-  }, [finance, open, setValue]);
+  }, [finance, setValue]);
 
   useEffect(() => {
     const fetchMembers = async () => {
@@ -80,19 +80,26 @@ const EditFinance = ({
       }
     };
 
-    if (open) {
-      fetchMembers();
-    }
-  }, [open]);
+    fetchMembers();
+  }, []);
 
   const onSubmit = async (data: TypeofFinanceData) => {
     try {
-      const { data: response } = await axios.put(`/api/finance/${finance.id}`, data);
+      // Convert "none" back to empty string for memberId before sending
+      const submitData = { ...data };
+      if (submitData.memberId === "none") {
+        submitData.memberId = "";
+      }
+      const { data: response } = await axios.put(
+        `/api/finance/${finance.id}`,
+        submitData
+      );
       if (response.success) {
         toast.success(response.message);
         onSuccess?.();
         onOpenChange(false);
         reset();
+        window.location.reload();
       }
     } catch (err) {
       if (err instanceof AxiosError) {
@@ -124,12 +131,15 @@ const EditFinance = ({
                 name="memberId"
                 control={control}
                 render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || "none"}
+                  >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select member" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {members?.map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {member.firstName} {member.lastName}
@@ -262,10 +272,7 @@ const EditFinance = ({
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="date">Date</Label>
-              <Input
-                type="date"
-                {...register("date", { valueAsDate: true })}
-              />
+              <Input type="date" {...register("date", { valueAsDate: true })} />
             </div>
 
             <div className="grid gap-2">
@@ -303,5 +310,4 @@ const EditFinance = ({
   );
 };
 
-export default EditFinance;
-
+export { EditFinanceDialog };

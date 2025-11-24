@@ -26,16 +26,16 @@ import { toast } from "sonner";
 import Image from "next/image";
 
 interface EditMemberProps {
+  member: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  member: any;
   onSuccess?: () => void;
 }
 
-const EditMember = ({
+const EditMemberDialog = ({
+  member,
   open,
   onOpenChange,
-  member,
   onSuccess,
 }: EditMemberProps) => {
   const [preview, setPreview] = useState<string | null>(null);
@@ -55,16 +55,16 @@ const EditMember = ({
   const imageFile = watch("image");
 
   useEffect(() => {
-    if (member && open) {
+    if (member) {
       setValue("firstName", member.firstName || "");
       setValue("lastName", member.lastName || "");
       setValue("email", member.email || "");
       setValue("phone", member.phone || "");
       setValue("address", member.address || "");
-      setValue("userId", member.userId || "");
+      setValue("userId", member.userId || "none");
       setPreview(member.image || null);
     }
-  }, [member, open, setValue]);
+  }, [member, setValue]);
 
   useEffect(() => {
     if (imageFile && typeof imageFile === "object" && "name" in imageFile) {
@@ -77,21 +77,26 @@ const EditMember = ({
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const { data } = await axios.get("/api/user?page=1&limit=1000");
-        setUsers(data.data.users);
+        const response = await axios.get("/api/user?page=1&limit=1000");
+        if (response.data.success && response.data.data) {
+          setUsers(response.data.data.users || []);
+        } else {
+          console.error("Unexpected response structure:", response.data);
+          setUsers([]);
+        }
       } catch (error) {
+        console.error("Error fetching users:", error);
         if (error instanceof AxiosError) {
-          toast.error(error.response?.data.message);
+          toast.error(error.response?.data?.message || "Failed to fetch users");
         } else {
           toast.error("Something went wrong");
         }
+        setUsers([]);
       }
     };
 
-    if (open) {
-      fetchUsers();
-    }
-  }, [open]);
+    fetchUsers();
+  }, []);
 
   const onSubmit = async (data: TypeofMemberData) => {
     try {
@@ -99,7 +104,12 @@ const EditMember = ({
       for (const key in data) {
         const value = (data as any)[key];
         if (value !== undefined && value !== null) {
-          formData.append(key, value);
+          // Convert "none" back to empty string for userId
+          if (key === "userId" && value === "none") {
+            formData.append(key, "");
+          } else {
+            formData.append(key, value);
+          }
         }
       }
 
@@ -113,6 +123,7 @@ const EditMember = ({
         onOpenChange(false);
         reset();
         setPreview(null);
+        window.location.reload();
       }
     } catch (err) {
       if (err instanceof AxiosError) {
@@ -235,18 +246,26 @@ const EditMember = ({
               render={({ field }) => (
                 <Select
                   onValueChange={field.onChange}
-                  value={field.value || ""}
+                  value={field.value || "none"}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select user" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="None">None</SelectItem>
-                    {users?.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user?.name}
-                      </SelectItem>
-                    ))}
+                    {users && users.length > 0 ? (
+                      <>
+                        <SelectItem value="none">None</SelectItem>
+                        {users.map((user) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user?.name || user?.email || "Unknown User"}
+                          </SelectItem>
+                        ))}
+                      </>
+                    ) : (
+                      <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                        No users available
+                      </div>
+                    )}
                   </SelectContent>
                 </Select>
               )}
@@ -278,4 +297,4 @@ const EditMember = ({
   );
 };
 
-export default EditMember;
+export { EditMemberDialog };

@@ -3,8 +3,6 @@ import { useState, useEffect } from "react";
 import { columns } from "@/columns/finance";
 import { DataTable } from "@/components/data-table";
 import AddFinance from "@/components/dialogs/finance/add.finance";
-import EditFinance from "@/components/dialogs/finance/edit.finance";
-import DeleteFinance from "@/components/dialogs/finance/delete.finance";
 import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/pagination";
@@ -13,9 +11,6 @@ const FinancePage = () => {
   const [finances, setFinances] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedFinance, setSelectedFinance] = useState<any>(null);
 
   const fetchFinances = async () => {
     setIsLoading(true);
@@ -33,20 +28,6 @@ const FinancePage = () => {
   useEffect(() => {
     fetchFinances();
   }, [page]);
-
-  const handleEdit = (finance: any) => {
-    setSelectedFinance(finance);
-    setEditDialogOpen(true);
-  };
-
-  const handleDelete = (finance: any) => {
-    setSelectedFinance(finance);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleSuccess = () => {
-    fetchFinances();
-  };
 
   return (
     <div>
@@ -67,10 +48,6 @@ const FinancePage = () => {
             <DataTable
               data={finances.data.finances || []}
               columns={columns}
-              meta={{
-                onEdit: handleEdit,
-                onDelete: handleDelete,
-              }}
             />
             {finances.data.pagination && (
               <Pagination
@@ -133,23 +110,6 @@ const FinancePage = () => {
           </div>
         )}
       </div>
-
-      {selectedFinance && (
-        <>
-          <EditFinance
-            open={editDialogOpen}
-            onOpenChange={setEditDialogOpen}
-            finance={selectedFinance}
-            onSuccess={handleSuccess}
-          />
-          <DeleteFinance
-            open={deleteDialogOpen}
-            onOpenChange={setDeleteDialogOpen}
-            finance={selectedFinance}
-            onSuccess={handleSuccess}
-          />
-        </>
-      )}
     </div>
   );
 };

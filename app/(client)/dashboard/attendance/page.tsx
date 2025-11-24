@@ -3,8 +3,6 @@ import { useState, useEffect } from "react";
 import { columns } from "@/columns/attendance";
 import { DataTable } from "@/components/data-table";
 import AddAttendance from "@/components/dialogs/attendance/add.attendance";
-import EditAttendance from "@/components/dialogs/attendance/edit.attendance";
-import DeleteAttendance from "@/components/dialogs/attendance/delete.attendance";
 import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/pagination";
@@ -22,9 +20,6 @@ const AttendancePage = () => {
   const [attendances, setAttendances] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedAttendance, setSelectedAttendance] = useState<any>(null);
 
   const fetchAttendances = async () => {
     setIsLoading(true);
@@ -42,20 +37,6 @@ const AttendancePage = () => {
   useEffect(() => {
     fetchAttendances();
   }, [page]);
-
-  const handleEdit = (attendance: any) => {
-    setSelectedAttendance(attendance);
-    setEditDialogOpen(true);
-  };
-
-  const handleDelete = (attendance: any) => {
-    setSelectedAttendance(attendance);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleSuccess = () => {
-    fetchAttendances();
-  };
 
   return (
     <div>
@@ -76,10 +57,6 @@ const AttendancePage = () => {
             <DataTable
               data={attendances.data.attendances || []}
               columns={columns}
-              meta={{
-                onEdit: handleEdit,
-                onDelete: handleDelete,
-              }}
             />
             {attendances.data.pagination && (
               <Pagination
@@ -142,23 +119,6 @@ const AttendancePage = () => {
           </div>
         )}
       </div>
-
-      {selectedAttendance && (
-        <>
-          <EditAttendance
-            open={editDialogOpen}
-            onOpenChange={setEditDialogOpen}
-            attendance={selectedAttendance}
-            onSuccess={handleSuccess}
-          />
-          <DeleteAttendance
-            open={deleteDialogOpen}
-            onOpenChange={setDeleteDialogOpen}
-            attendance={selectedAttendance}
-            onSuccess={handleSuccess}
-          />
-        </>
-      )}
     </div>
   );
 };
