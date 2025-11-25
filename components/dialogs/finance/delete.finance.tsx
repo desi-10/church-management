@@ -31,7 +31,9 @@ const DeleteFinanceDialog = ({
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      const { data: response } = await axios.delete(`/api/finance/${finance.id}`);
+      const { data: response } = await axios.delete(
+        `/api/finance/${finance.id}`
+      );
       if (response.success) {
         toast.success(response.message);
         onSuccess?.();
@@ -52,7 +54,7 @@ const DeleteFinanceDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Delete Transaction</DialogTitle>
@@ -66,7 +68,7 @@ const DeleteFinanceDialog = ({
           <Button
             type="button"
             variant="outline"
-            onClick={() => setOpen(false)}
+            onClick={() => onOpenChange(false)}
             disabled={isDeleting}
           >
             Cancel
@@ -91,4 +93,3 @@ const DeleteFinanceDialog = ({
 };
 
 export { DeleteFinanceDialog };
-

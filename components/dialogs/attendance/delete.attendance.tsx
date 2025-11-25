@@ -54,7 +54,7 @@ const DeleteAttendanceDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Delete Attendance</DialogTitle>
@@ -93,4 +93,3 @@ const DeleteAttendanceDialog = ({
 };
 
 export { DeleteAttendanceDialog };
-
