@@ -8,39 +8,52 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ExportButtons } from "@/components/export-buttons";
 import { Pagination } from "@/components/pagination";
 
+interface MemberResponse {
+  success: boolean;
+  data: {
+    members: any[];
+    pagination: {
+      page: number;
+      totalPages: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+  };
+}
+
 const MembersPage = () => {
-  const [members, setMembers] = useState<any>(null);
+  const [members, setMembers] = useState<MemberResponse | null>(null);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchMembers = async (currentPage: number) => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(
-        `/api/member?page=${currentPage}&limit=10`
-      );
-      const data = response.data;
-      setMembers(data);
-    } catch (error) {
-      console.error("Error fetching members:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchMembers(page);
+    const fetchMembers = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.get(`/api/member?page=${page}&limit=10`);
+        const data = response.data;
+        setMembers(data);
+      } catch (error) {
+        console.error("Error fetching members:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMembers();
   }, [page]);
 
   return (
     <div>
-      <div className="w-full mb-10 flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-primary">Members</h1>
+      <div className="w-full mb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="w-full sm:w-auto">
+          <h1 className="text-3xl sm:text-4xl font-bold text-primary">
+            Members
+          </h1>
           <p className="h-2 w-full bg bg-amber-500 -mt-3" />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           <ExportButtons
             data={members?.data?.members || []}
             fileName="members"

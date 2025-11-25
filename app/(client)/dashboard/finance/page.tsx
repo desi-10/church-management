@@ -6,38 +6,73 @@ import AddFinance from "@/components/dialogs/finance/add.finance";
 import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/pagination";
+import { ExportButtons } from "@/components/export-buttons";
+
+interface FinanceResponse {
+  success: boolean;
+  data: {
+    finances: any[];
+    pagination: {
+      page: number;
+      totalPages: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+  };
+}
 
 const FinancePage = () => {
-  const [finances, setFinances] = useState<any>(null);
+  const [finances, setFinances] = useState<FinanceResponse | null>(null);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchFinances = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(`/api/finance?page=${page}&limit=10`);
-      const data = response.data;
-      setFinances(data);
-    } catch (error) {
-      console.error("Error fetching finances:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchFinances = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.get(`/api/finance?page=${page}&limit=10`);
+        const data = response.data;
+        setFinances(data);
+      } catch (error) {
+        console.error("Error fetching finances:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchFinances();
   }, [page]);
 
   return (
     <div>
-      <div className="w-full mb-10 flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-primary">Finance</h1>
+      <div className="w-full mb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="w-full sm:w-auto">
+          <h1 className="text-3xl sm:text-4xl font-bold text-primary">
+            Finance
+          </h1>
           <p className="h-2 w-full bg-amber-400 -mt-3" />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <ExportButtons
+            data={finances?.data?.finances || []}
+            fileName="finances"
+            title="Finances Report"
+            columns={[
+              { header: "Date", dataKey: "date" },
+              { header: "Amount", dataKey: "amount" },
+              { header: "Type", dataKey: "type" },
+              { header: "Category", dataKey: "category" },
+              { header: "Member", dataKey: "member" },
+              { header: "Reference", dataKey: "reference" },
+              { header: "Status", dataKey: "status" },
+              { header: "Payment Type", dataKey: "paymentType" },
+              { header: "Currency", dataKey: "currency" },
+              { header: "Reconciled", dataKey: "reconciled" },
+              { header: "Receipt", dataKey: "receiptUrl" },
+              { header: "Fund", dataKey: "fund" },
+            ]}
+          />
           <AddFinance />
         </div>
       </div>
@@ -45,10 +80,7 @@ const FinancePage = () => {
       <div className="w-full">
         {finances ? (
           <>
-            <DataTable
-              data={finances.data.finances || []}
-              columns={columns}
-            />
+            <DataTable data={finances.data.finances || []} columns={columns} />
             {finances.data.pagination && (
               <Pagination
                 page={finances.data.pagination.page}

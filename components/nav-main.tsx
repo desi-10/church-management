@@ -3,13 +3,14 @@
 import type * as React from "react";
 import type { Icon } from "@tabler/icons-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
 } from "@/components/ui/sidebar";
+import { useSidebar } from "./ui/sidebar";
 
 export function NavMain({
   items,
@@ -26,14 +27,25 @@ export function NavMain({
         }>;
   }[];
 }) {
+  const { setOpen } = useSidebar();
+  const { setOpenMobile } = useSidebar();
   const pathname = usePathname();
-
+  const router = useRouter();
+  const handleClick = (url: string) => {
+    if (url === pathname) {
+      router.refresh();
+    } else {
+      setOpen(false);
+      setOpenMobile(false);
+      router.push(url);
+    }
+  };
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
         {/* Navigation Label */}
         <div className="px-3 mb-2">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
             Menu
           </p>
         </div>
@@ -47,19 +59,20 @@ export function NavMain({
               <Link
                 href={item.url}
                 key={item.title}
+                onClick={() => handleClick(item.url)}
                 className={`
                   group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium
                   transition-all duration-300 ease-out
                   ${
                     isActive
-                      ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-600/30 scale-[1.02]"
-                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900 active:scale-[0.98]"
+                      ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30 scale-[1.02]"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:scale-[0.98]"
                   }
                 `}
               >
                 {/* Active glow effect */}
                 {isActive && (
-                  <div className="absolute inset-0 bg-blue-400/20 rounded-xl blur-md -z-10 animate-pulse" />
+                  <div className="absolute inset-0 bg-primary/20 rounded-xl blur-md -z-10 animate-pulse" />
                 )}
 
                 {/* Icon */}
@@ -77,8 +90,8 @@ export function NavMain({
                         transition-all duration-300
                         ${
                           isActive
-                            ? "text-white drop-shadow-sm"
-                            : "text-gray-600 group-hover:text-gray-900"
+                            ? "text-primary-foreground drop-shadow-sm"
+                            : "text-sidebar-foreground/70 group-hover:text-sidebar-accent-foreground"
                         }
                       `}
                     />
@@ -97,12 +110,12 @@ export function NavMain({
 
                 {/* Active indicator dot */}
                 {isActive && (
-                  <div className="w-1.5 h-1.5 rounded-full bg-white/90 shadow-sm" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground/90 shadow-sm" />
                 )}
 
                 {/* Hover shimmer effect */}
                 {!isActive && (
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-blue-100/0 to-transparent group-hover:via-blue-100/50 transition-all duration-500 -z-10" />
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-sidebar-accent/0 to-transparent group-hover:via-sidebar-accent/50 transition-all duration-500 -z-10" />
                 )}
               </Link>
             );

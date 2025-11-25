@@ -97,7 +97,7 @@ const AddUser = () => {
                     className="object-cover"
                   />
                 ) : (
-                  <Upload className="h-10 w-10 text-gray-400" />
+                  <Upload className="h-10 w-10 text-muted-foreground" />
                 )}
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
                   <Upload className="h-6 w-6 text-white" />

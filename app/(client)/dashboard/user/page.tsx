@@ -31,13 +31,13 @@ const UsersPage = () => {
 
   return (
     <div>
-      <div className="w-full mb-10 flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-primary">Users</h1>
+      <div className="w-full mb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="w-full sm:w-auto">
+          <h1 className="text-3xl sm:text-4xl font-bold text-primary">Users</h1>
           <p className="h-2 w-full bg bg-amber-500 -mt-3" />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           <ExportButtons
             data={users?.data?.users || []}
             fileName="users"

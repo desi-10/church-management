@@ -4,10 +4,10 @@ import { DataTable } from "@/components/data-table";
 import AddSMS from "@/components/dialogs/sms/add.sms";
 import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Pagination } from "@/components/pagination";
 
@@ -21,26 +21,39 @@ type SMS = {
   sentCount: number;
 };
 
+interface SMSResponse {
+  success: boolean;
+  data: {
+    sms: any[];
+    pagination: {
+      page: number;
+      totalPages: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+  };
+}
+
 const SMSPage = () => {
-  const [sms, setSMS] = useState<any>(null);
+  const [sms, setSMS] = useState<SMSResponse | null>(null);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchSMS = async (currentPage: number) => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(`/api/sms?page=${currentPage}&limit=10`);
-      const data = response.data;
-      setSMS(data);
-    } catch (error) {
-      console.error("Error fetching SMS:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchSMS(page);
+    const fetchSMS = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.get(`/api/sms?page=${page}&limit=10`);
+        const data = response.data;
+        setSMS(data);
+      } catch (error) {
+        console.error("Error fetching SMS:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSMS();
   }, [page]);
 
   const handleDelete = async (id: string) => {
@@ -50,9 +63,13 @@ const SMSPage = () => {
       const response = await axios.delete(`/api/sms/${id}`);
       if (response.data.success) {
         toast.success(response.data.message);
-        fetchSMS(page);
+        // Refetch SMS data after deletion
+        const refetchResponse = await axios.get(
+          `/api/sms?page=${page}&limit=10`
+        );
+        setSMS(refetchResponse.data);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete SMS");
     }
   };
@@ -146,13 +163,13 @@ const SMSPage = () => {
 
   return (
     <div>
-      <div className="w-full mb-10 flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-primary">SMS</h1>
+      <div className="w-full mb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="w-full sm:w-auto">
+          <h1 className="text-3xl sm:text-4xl font-bold text-primary">SMS</h1>
           <p className="h-2 w-full bg-amber-400 -mt-3" />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           <AddSMS />
         </div>
       </div>
@@ -183,7 +200,7 @@ const SMSPage = () => {
               </div>
 
               <div className="rounded-md border">
-                <div className="border-b bg-gray-50/50">
+                <div className="border-b bg-muted/50">
                   <div className="flex">
                     {[1, 2, 3, 4, 5].map((i) => (
                       <div key={i} className="flex-1 p-4">

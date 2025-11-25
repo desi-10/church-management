@@ -6,47 +6,70 @@ import AddAttendance from "@/components/dialogs/attendance/add.attendance";
 import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/pagination";
+import { ExportButtons } from "@/components/export-buttons";
 
-type Attendance = {
-  id: string;
-  firstname: string;
-  lastname: string;
-  phone: string;
-  status: string;
-  date: string;
-};
+interface AttendanceResponse {
+  success: boolean;
+  data: {
+    attendances: any[];
+    pagination: {
+      page: number;
+      totalPages: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+  };
+}
 
 const AttendancePage = () => {
-  const [attendances, setAttendances] = useState<any>(null);
+  const [attendances, setAttendances] = useState<AttendanceResponse | null>(
+    null
+  );
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchAttendances = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(`/api/attendance?page=${page}&limit=10`);
-      const data = response.data;
-      setAttendances(data);
-    } catch (error) {
-      console.error("Error fetching attendances:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchAttendances = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.get(
+          `/api/attendance?page=${page}&limit=10`
+        );
+        const data = response.data;
+        setAttendances(data);
+      } catch (error) {
+        console.error("Error fetching attendances:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchAttendances();
   }, [page]);
 
   return (
     <div>
-      <div className="w-full mb-10 flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-primary">Attendance</h1>
+      <div className="w-full mb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="w-full sm:w-auto">
+          <h1 className="text-3xl sm:text-4xl font-bold text-primary">
+            Attendance
+          </h1>
           <p className="h-2 w-full bg-amber-400 -mt-3" />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <ExportButtons
+            data={attendances?.data?.attendances || []}
+            fileName="attendances"
+            title="Attendances Report"
+            columns={[
+              { header: "Date", dataKey: "date" },
+              { header: "Status", dataKey: "status" },
+              { header: "Member", dataKey: "member" },
+              { header: "Firstname", dataKey: "firstname" },
+              { header: "Lastname", dataKey: "lastname" },
+            ]}
+          />
           <AddAttendance />
         </div>
       </div>

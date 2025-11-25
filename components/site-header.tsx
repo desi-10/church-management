@@ -66,17 +66,17 @@ export function SiteHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/90 shadow-sm">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 shadow-sm dark:shadow-none dark:border-border/40">
       <div className="flex h-16 items-center gap-4 px-4 lg:px-6">
         {/* Left Section - Trigger & Title */}
         <div className="flex items-center gap-4">
-          <SidebarTrigger className="hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-200" />
+          <SidebarTrigger className="hover:bg-accent hover:text-accent-foreground rounded-lg transition-all duration-200" />
           <Separator orientation="vertical" className="h-6 bg-border/50" />
           <div className="hidden md:flex flex-col">
-            <h1 className="text-lg font-bold text-gray-900 tracking-tight">
+            <h1 className="text-lg font-bold text-foreground tracking-tight">
               {pageTitle}
             </h1>
-            <p className="text-xs text-gray-500 font-medium">
+            <p className="text-xs text-muted-foreground font-medium">
               {pageDescription}
             </p>
           </div>
@@ -85,11 +85,11 @@ export function SiteHeader() {
         {/* Center Section - Search (Desktop only) */}
         <div className="hidden lg:flex flex-1 max-w-md mx-auto">
           <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Search members, transactions..."
-              className="w-full pl-10 pr-4 h-10 rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 bg-gray-50/50"
+              className="w-full pl-10 pr-4 h-10 rounded-lg border-border focus:border-primary focus:ring-primary/20 bg-muted/50"
             />
           </div>
         </div>
@@ -100,7 +100,7 @@ export function SiteHeader() {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden hover:bg-blue-50 hover:text-blue-600 rounded-lg"
+            className="lg:hidden hover:bg-accent hover:text-accent-foreground rounded-lg"
           >
             <Search className="h-5 w-5" />
           </Button>
@@ -111,10 +111,10 @@ export function SiteHeader() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative hover:bg-blue-50 hover:text-blue-600 rounded-lg"
+                className="relative hover:bg-accent hover:text-accent-foreground rounded-lg"
               >
                 <Bell className="h-5 w-5" />
-                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-amber-400 ring-2 ring-white" />
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-amber-400 ring-2 ring-background dark:ring-card" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
@@ -122,7 +122,7 @@ export function SiteHeader() {
                 Notifications
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <div className="p-4 text-center text-sm text-gray-500">
+              <div className="p-4 text-center text-sm text-muted-foreground">
                 No new notifications
               </div>
             </DropdownMenuContent>
@@ -136,14 +136,14 @@ export function SiteHeader() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="relative h-10 w-10 rounded-full hover:ring-2 hover:ring-blue-500/20 transition-all"
+                className="relative h-10 w-10 rounded-full hover:ring-2 hover:ring-primary/20 transition-all"
               >
-                <Avatar className="h-10 w-10 border-2 border-blue-100">
+                <Avatar className="h-10 w-10 border-2 border-primary/20">
                   <AvatarImage
                     src={session?.user?.image || "/avatars/admin.jpg"}
                     alt="Admin"
                   />
-                  <AvatarFallback className="bg-gradient-to-br from-blue-600 to-blue-700 text-white font-bold">
+                  <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground font-bold">
                     {session?.user?.name?.charAt(0) || "A"}{" "}
                     {session?.user?.name?.split(" ")[1]?.charAt(0) || ""}
                   </AvatarFallback>
@@ -156,7 +156,7 @@ export function SiteHeader() {
                   <p className="text-sm font-semibold">
                     {session?.user?.name || "Admin"}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     {session?.user?.email || "admin@church.com"}
                   </p>
                 </div>
@@ -168,7 +168,7 @@ export function SiteHeader() {
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleSignOut}
-                className="cursor-pointer text-red-600"
+                className="cursor-pointer text-destructive"
               >
                 <IconLogout className="w-4 h-4" /> Log out
               </DropdownMenuItem>

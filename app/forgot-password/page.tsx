@@ -57,7 +57,7 @@ const ForgotPasswordPage = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-white">
+      <div className="flex-1 flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-md">
           <div className="mb-8">
             <Link href="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-4">

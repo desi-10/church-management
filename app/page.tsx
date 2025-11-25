@@ -74,10 +74,10 @@ export default function Home() {
   console.log(errors);
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-gray-50 via-purple-50/30 to-indigo-50/40 p-4 lg:p-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 w-full max-w-6xl bg-white shadow-lg overflow-hidden">
-        {/* Left Side - White Login Panel */}
-        <div className="bg-white flex flex-col p-8 lg:p-12 xl:p-16">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-muted/40 p-4 lg:p-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 w-full max-w-6xl bg-card shadow-lg overflow-hidden rounded-lg">
+        {/* Left Side - Login Panel */}
+        <div className="bg-card flex flex-col p-8 lg:p-12 xl:p-16">
           {/* Logo & Brand */}
           <div className="flex items-center gap-2 mb-16">
             <div className="relative w-8 h-8">
@@ -88,7 +88,7 @@ export default function Home() {
                 className="object-contain"
               />
             </div>
-            <span className="text-base font-semibold text-gray-900">
+            <span className="text-base font-semibold text-foreground">
               Christ Assembly Worldwide - Ho
             </span>
           </div>
@@ -97,8 +97,8 @@ export default function Home() {
           <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
             {/* Heading */}
             <div className="mb-8">
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Login</h1>
-              <p className="text-sm text-gray-600">
+              <h1 className="text-4xl font-bold text-foreground mb-2">Login</h1>
+              <p className="text-sm text-muted-foreground">
                 Manage your church community and access your dashboard
               </p>
             </div>
@@ -107,7 +107,7 @@ export default function Home() {
             <Button
               type="button"
               variant="outline"
-              className="w-full h-12 mb-5 justify-center gap-2 border-gray-200 hover:bg-gray-50"
+              className="w-full h-12 mb-5 justify-center gap-2"
               // onClick={handleGoogleSignIn}
             >
               <svg
@@ -139,11 +139,11 @@ export default function Home() {
 
             {/* Divider */}
             <div className="flex items-center gap-4 mb-6">
-              <div className="flex-1 h-px bg-gray-200" />
-              <span className="text-xs text-gray-400 uppercase">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-xs text-muted-foreground uppercase">
                 or Sign in with Email
               </span>
-              <div className="flex-1 h-px bg-gray-200" />
+              <div className="flex-1 h-px bg-border" />
             </div>
 
             {/* Login Form */}
@@ -152,7 +152,7 @@ export default function Home() {
               <div className="space-y-2">
                 <Label
                   htmlFor="email"
-                  className="text-sm font-medium text-gray-700"
+                  className="text-sm font-medium text-foreground"
                 >
                   Email
                 </Label>
@@ -172,7 +172,7 @@ export default function Home() {
               <div className="space-y-2">
                 <Label
                   htmlFor="password"
-                  className="text-sm font-medium text-gray-700"
+                  className="text-sm font-medium text-foreground"
                 >
                   Password
                 </Label>
@@ -203,14 +203,14 @@ export default function Home() {
                   />
                   <Label
                     htmlFor="remember"
-                    className="text-sm font-normal text-gray-700 cursor-pointer"
+                    className="text-sm font-normal text-foreground cursor-pointer"
                   >
                     Remember me
                   </Label>
                 </div>
                 <Link
                   href="/forgot-password"
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium hover:underline"
+                  className="text-sm text-primary hover:text-primary/80 font-medium hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -219,16 +219,16 @@ export default function Home() {
               {/* Login Button */}
               <Button
                 type="button"
-                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
                 onClick={handleSubmit(onSubmit)}
               >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="text-white">Logging in...</span>
+                    <span>Logging in...</span>
                   </>
                 ) : (
-                  <span className="text-white">Login</span>
+                  <span>Login</span>
                 )}
               </Button>
 
@@ -247,7 +247,7 @@ export default function Home() {
 
           {/* Footer */}
           <div className="mt-8">
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-muted-foreground">
               © {new Date().getFullYear()} Christ Assembly. All rights reserved.
             </p>
           </div>
