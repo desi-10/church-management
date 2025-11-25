@@ -1,51 +1,16 @@
 "use client";
-import { useState, useEffect } from "react";
 import { columns } from "@/columns/attendance";
 import { DataTable } from "@/components/data-table";
 import AddAttendance from "@/components/dialogs/attendance/add.attendance";
-import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/pagination";
 import { ExportButtons } from "@/components/export-buttons";
-
-interface AttendanceResponse {
-  success: boolean;
-  data: {
-    attendances: any[];
-    pagination: {
-      page: number;
-      totalPages: number;
-      hasNextPage: boolean;
-      hasPrevPage: boolean;
-    };
-  };
-}
+import { useAttendances } from "@/hooks/use-attendances";
+import { useState } from "react";
 
 const AttendancePage = () => {
-  const [attendances, setAttendances] = useState<AttendanceResponse | null>(
-    null
-  );
   const [page, setPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchAttendances = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axios.get(
-          `/api/attendance?page=${page}&limit=10`
-        );
-        const data = response.data;
-        setAttendances(data);
-      } catch (error) {
-        console.error("Error fetching attendances:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAttendances();
-  }, [page]);
+  const { data: attendances, isLoading } = useAttendances(page, 10);
 
   return (
     <div>
@@ -59,7 +24,17 @@ const AttendancePage = () => {
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <ExportButtons
-            data={attendances?.data?.attendances || []}
+            data={
+              (attendances?.attendances || []).map((a) => ({
+                date: a.date,
+                status: a.status,
+                member: a.member
+                  ? `${a.member.firstName} ${a.member.lastName}`
+                  : "",
+                firstname: a.firstname || "",
+                lastname: a.lastname || "",
+              })) as Record<string, unknown>[]
+            }
             fileName="attendances"
             title="Attendances Report"
             columns={[
@@ -75,24 +50,7 @@ const AttendancePage = () => {
       </div>
 
       <div className="w-full">
-        {attendances ? (
-          <>
-            <DataTable
-              data={attendances.data.attendances || []}
-              columns={columns}
-            />
-            {attendances.data.pagination && (
-              <Pagination
-                page={attendances.data.pagination.page}
-                totalPages={attendances.data.pagination.totalPages}
-                hasNextPage={attendances.data.pagination.hasNextPage}
-                hasPrevPage={attendances.data.pagination.hasPrevPage}
-                onPageChange={(newPage) => setPage(newPage)}
-                isLoading={isLoading}
-              />
-            )}
-          </>
-        ) : (
+        {isLoading ? (
           <div className="text-xs">
             <div className="rounded-md">
               <div className="flex justify-between items-center mb-5">
@@ -103,9 +61,9 @@ const AttendancePage = () => {
               </div>
 
               <div className="rounded-md border">
-                <div className="border-b bg-gray-50/50">
+                <div className="border-b bg-muted/50">
                   <div className="flex">
-                    {[1, 2, 3, 4, 5].map((i) => (
+                    {[1, 2, 3, 4].map((i) => (
                       <div key={i} className="flex-1 p-4">
                         <Skeleton className="h-4 w-20" />
                       </div>
@@ -117,29 +75,38 @@ const AttendancePage = () => {
                   {[1, 2, 3, 4, 5, 6, 7, 8].map((row) => (
                     <div
                       key={row}
-                      className="flex border-b last:border-b-0 hover:bg-gray-50/50"
+                      className="border-b last:border-0 hover:bg-muted/50"
                     >
-                      {[1, 2, 3, 4, 5].map((col) => (
-                        <div key={col} className="flex-1 p-4">
-                          <Skeleton className="h-4 w-full max-w-[150px]" />
-                        </div>
-                      ))}
+                      <div className="flex">
+                        {[1, 2, 3, 4].map((col) => (
+                          <div key={col} className="flex-1 p-4">
+                            <Skeleton className="h-4 w-full" />
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
-
-              <div className="mt-8 flex items-center justify-between">
-                <Skeleton className="h-4 w-48" />
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-9 w-9 rounded-md" />
-                  <Skeleton className="h-9 w-9 rounded-md" />
-                  <Skeleton className="h-9 w-9 rounded-md" />
-                  <Skeleton className="h-9 w-9 rounded-md" />
-                </div>
-              </div>
             </div>
           </div>
+        ) : (
+          <>
+            <DataTable
+              data={(attendances?.attendances as any) || []}
+              columns={columns}
+            />
+            {attendances?.pagination && (
+              <Pagination
+                page={attendances.pagination.page}
+                totalPages={attendances.pagination.totalPages}
+                hasNextPage={attendances.pagination.hasNextPage}
+                hasPrevPage={attendances.pagination.hasPrevPage}
+                onPageChange={(newPage) => setPage(newPage)}
+                isLoading={isLoading}
+              />
+            )}
+          </>
         )}
       </div>
     </div>

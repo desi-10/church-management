@@ -81,7 +81,7 @@ export const columns: ColumnDef<UserTable>[] = [
     cell: ({ row, table }) => {
       const meta = table.options.meta as any;
       return (
-        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"

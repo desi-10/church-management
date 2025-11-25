@@ -1,77 +1,33 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { DataTable } from "@/components/data-table";
 import AddSMS from "@/components/dialogs/sms/add.sms";
-import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { toast } from "sonner";
 import { Pagination } from "@/components/pagination";
+import { useSMS, useDeleteSMS } from "@/hooks/use-sms";
 
 type SMS = {
   id: string;
   message: string;
   recipients: string[];
-  scheduledFor: string;
+  scheduledFor?: string;
   status: string;
   sentAt?: string | null;
   sentCount: number;
 };
 
-interface SMSResponse {
-  success: boolean;
-  data: {
-    sms: any[];
-    pagination: {
-      page: number;
-      totalPages: number;
-      hasNextPage: boolean;
-      hasPrevPage: boolean;
-    };
-  };
-}
-
 const SMSPage = () => {
-  const [sms, setSMS] = useState<SMSResponse | null>(null);
   const [page, setPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchSMS = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axios.get(`/api/sms?page=${page}&limit=10`);
-        const data = response.data;
-        setSMS(data);
-      } catch (error) {
-        console.error("Error fetching SMS:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSMS();
-  }, [page]);
+  const { data: sms, isLoading } = useSMS(page, 10);
+  const deleteSMS = useDeleteSMS();
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this scheduled SMS?")) return;
-
-    try {
-      const response = await axios.delete(`/api/sms/${id}`);
-      if (response.data.success) {
-        toast.success(response.data.message);
-        // Refetch SMS data after deletion
-        const refetchResponse = await axios.get(
-          `/api/sms?page=${page}&limit=10`
-        );
-        setSMS(refetchResponse.data);
-      }
-    } catch {
-      toast.error("Failed to delete SMS");
-    }
+    deleteSMS.mutate(id);
   };
 
   const columns: ColumnDef<SMS>[] = [
@@ -81,7 +37,7 @@ const SMSPage = () => {
       cell: ({ row }) => {
         const message = row.getValue("message") as string;
         return (
-          <div className="max-w-xs">
+          <div className="max-w-[300px]">
             <p className="truncate text-sm">{message}</p>
           </div>
         );
@@ -92,17 +48,35 @@ const SMSPage = () => {
       header: "Recipients",
       cell: ({ row }) => {
         const recipients = row.getValue("recipients") as string[];
-        return <span className="text-sm">{recipients.length}</span>;
+        return (
+          <div className="flex items-center gap-1">
+            <Badge variant="secondary" className="text-xs">
+              {recipients?.length || 0} recipients
+            </Badge>
+          </div>
+        );
       },
     },
     {
       accessorKey: "scheduledFor",
       header: "Scheduled For",
       cell: ({ row }) => {
-        const date = row.getValue("scheduledFor") as string;
-        return (
-          <span className="text-sm">{new Date(date).toLocaleString()}</span>
+        const scheduledFor = row.getValue("scheduledFor") as string;
+        return scheduledFor ? (
+          <span className="text-sm">
+            {new Date(scheduledFor).toLocaleString()}
+          </span>
+        ) : (
+          <span className="text-sm text-muted-foreground">Immediate</span>
         );
+      },
+    },
+    {
+      accessorKey: "sentCount",
+      header: "Sent Count",
+      cell: ({ row }) => {
+        const sentCount = row.getValue("sentCount") as number;
+        return <span className="text-sm font-medium">{sentCount}</span>;
       },
     },
     {
@@ -175,21 +149,7 @@ const SMSPage = () => {
       </div>
 
       <div className="w-full">
-        {sms ? (
-          <>
-            <DataTable data={sms.data.sms || []} columns={columns} />
-            {sms.data.pagination && (
-              <Pagination
-                page={sms.data.pagination.page}
-                totalPages={sms.data.pagination.totalPages}
-                hasNextPage={sms.data.pagination.hasNextPage}
-                hasPrevPage={sms.data.pagination.hasPrevPage}
-                onPageChange={(newPage) => setPage(newPage)}
-                isLoading={isLoading}
-              />
-            )}
-          </>
-        ) : (
+        {isLoading ? (
           <div className="text-xs">
             <div className="rounded-md">
               <div className="flex justify-between items-center mb-5">
@@ -214,29 +174,35 @@ const SMSPage = () => {
                   {[1, 2, 3, 4, 5, 6, 7, 8].map((row) => (
                     <div
                       key={row}
-                      className="flex border-b last:border-b-0 hover:bg-gray-50/50"
+                      className="border-b last:border-0 hover:bg-muted/50"
                     >
-                      {[1, 2, 3, 4, 5].map((col) => (
-                        <div key={col} className="flex-1 p-4">
-                          <Skeleton className="h-4 w-full max-w-[150px]" />
-                        </div>
-                      ))}
+                      <div className="flex">
+                        {[1, 2, 3, 4, 5].map((col) => (
+                          <div key={col} className="flex-1 p-4">
+                            <Skeleton className="h-4 w-full" />
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
-
-              <div className="mt-8 flex items-center justify-between">
-                <Skeleton className="h-4 w-48" />
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-9 w-9 rounded-md" />
-                  <Skeleton className="h-9 w-9 rounded-md" />
-                  <Skeleton className="h-9 w-9 rounded-md" />
-                  <Skeleton className="h-9 w-9 rounded-md" />
-                </div>
-              </div>
             </div>
           </div>
+        ) : (
+          <>
+            <DataTable data={sms?.sms || []} columns={columns} />
+            {sms?.pagination && (
+              <Pagination
+                page={sms.pagination.page}
+                totalPages={sms.pagination.totalPages}
+                hasNextPage={sms.pagination.hasNextPage}
+                hasPrevPage={sms.pagination.hasPrevPage}
+                onPageChange={(newPage) => setPage(newPage)}
+                isLoading={isLoading}
+              />
+            )}
+          </>
         )}
       </div>
     </div>

@@ -1,47 +1,16 @@
 "use client";
 import { DataTable } from "@/components/data-table";
 import AddMember from "@/components/dialogs/members/add.member";
-import { useEffect, useState } from "react";
 import { columns } from "@/columns/members";
-import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExportButtons } from "@/components/export-buttons";
 import { Pagination } from "@/components/pagination";
-
-interface MemberResponse {
-  success: boolean;
-  data: {
-    members: any[];
-    pagination: {
-      page: number;
-      totalPages: number;
-      hasNextPage: boolean;
-      hasPrevPage: boolean;
-    };
-  };
-}
+import { useMembers } from "@/hooks/use-members";
+import { useState } from "react";
 
 const MembersPage = () => {
-  const [members, setMembers] = useState<MemberResponse | null>(null);
   const [page, setPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchMembers = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axios.get(`/api/member?page=${page}&limit=10`);
-        const data = response.data;
-        setMembers(data);
-      } catch (error) {
-        console.error("Error fetching members:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchMembers();
-  }, [page]);
+  const { data: members, isLoading } = useMembers(page, 10);
 
   return (
     <div>
@@ -55,7 +24,15 @@ const MembersPage = () => {
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <ExportButtons
-            data={members?.data?.members || []}
+            data={
+              (members?.members || []).map((m) => ({
+                firstName: m.firstName,
+                lastName: m.lastName,
+                email: m.email,
+                phone: m.phone,
+                address: m.address,
+              })) as Record<string, unknown>[]
+            }
             fileName="members"
             title="Members Report"
             columns={[
@@ -71,21 +48,7 @@ const MembersPage = () => {
       </div>
 
       <div className="w-full">
-        {members ? (
-          <>
-            <DataTable data={members.data.members || []} columns={columns} />
-            {members.data.pagination && (
-              <Pagination
-                page={members.data.pagination.page}
-                totalPages={members.data.pagination.totalPages}
-                hasNextPage={members.data.pagination.hasNextPage}
-                hasPrevPage={members.data.pagination.hasPrevPage}
-                onPageChange={(newPage) => setPage(newPage)}
-                isLoading={isLoading}
-              />
-            )}
-          </>
-        ) : (
+        {isLoading ? (
           <div className="text-xs">
             <div className="rounded-md">
               {/* Table Controls Skeleton */}
@@ -99,7 +62,7 @@ const MembersPage = () => {
               {/* Table Skeleton */}
               <div className="rounded-md border">
                 {/* Table Header */}
-                <div className="border-b bg-gray-50/50">
+                <div className="border-b bg-muted/50">
                   <div className="flex">
                     {[1, 2, 3, 4, 5].map((i) => (
                       <div key={i} className="flex-1 p-4">
@@ -114,33 +77,39 @@ const MembersPage = () => {
                   {[1, 2, 3, 4, 5, 6, 7, 8].map((row) => (
                     <div
                       key={row}
-                      className="flex border-b last:border-b-0 hover:bg-gray-50/50"
+                      className="border-b last:border-0 hover:bg-muted/50"
                     >
-                      {[1, 2, 3, 4, 5].map((col) => (
-                        <div key={col} className="flex-1 p-4">
-                          <Skeleton className="h-4 w-full max-w-[150px]" />
-                        </div>
-                      ))}
+                      <div className="flex">
+                        {[1, 2, 3, 4, 5].map((col) => (
+                          <div key={col} className="flex-1 p-4">
+                            <Skeleton className="h-4 w-full" />
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
-
-              {/* Pagination Skeleton */}
-              <div className="mt-8 flex items-center justify-between">
-                <Skeleton className="h-4 w-48" />
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-9 w-9 rounded-md" />
-                  <Skeleton className="h-9 w-9 rounded-md" />
-                  <Skeleton className="h-9 w-9 rounded-md" />
-                  <Skeleton className="h-9 w-9 rounded-md" />
-                </div>
-              </div>
             </div>
           </div>
+        ) : (
+          <>
+            <DataTable data={members?.members || []} columns={columns} />
+            {members?.pagination && (
+              <Pagination
+                page={members.pagination.page}
+                totalPages={members.pagination.totalPages}
+                hasNextPage={members.pagination.hasNextPage}
+                hasPrevPage={members.pagination.hasPrevPage}
+                onPageChange={(newPage) => setPage(newPage)}
+                isLoading={isLoading}
+              />
+            )}
+          </>
         )}
       </div>
     </div>
   );
 };
+
 export default MembersPage;

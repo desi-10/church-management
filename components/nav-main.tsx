@@ -3,14 +3,13 @@
 import type * as React from "react";
 import type { Icon } from "@tabler/icons-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
 } from "@/components/ui/sidebar";
-import { useSidebar } from "./ui/sidebar";
 
 export function NavMain({
   items,
@@ -27,19 +26,8 @@ export function NavMain({
         }>;
   }[];
 }) {
-  const { setOpen } = useSidebar();
-  const { setOpenMobile } = useSidebar();
   const pathname = usePathname();
-  const router = useRouter();
-  const handleClick = (url: string) => {
-    if (url === pathname) {
-      router.refresh();
-    } else {
-      setOpen(false);
-      setOpenMobile(false);
-      router.push(url);
-    }
-  };
+
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -59,7 +47,6 @@ export function NavMain({
               <Link
                 href={item.url}
                 key={item.title}
-                onClick={() => handleClick(item.url)}
                 className={`
                   group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium
                   transition-all duration-300 ease-out

@@ -43,6 +43,21 @@ export const GET = asyncHandler(async () => {
     })
     .reduce((sum, record) => sum + Number(record.amount), 0);
 
+  // Get revenue last month for comparison
+  const lastMonthStart = new Date(startOfMonth);
+  lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
+
+  const revenueLastMonth = financeRecords
+    .filter((record) => {
+      const recordDate = new Date(record.date);
+      return (
+        recordDate >= lastMonthStart &&
+        recordDate < startOfMonth &&
+        record.currency === "GHS"
+      );
+    })
+    .reduce((sum, record) => sum + Number(record.amount), 0);
+
   // Get new timers (first-time attendees) this month
   const newTimers = await prisma.attendance.count({
     where: {
@@ -92,14 +107,14 @@ export const GET = asyncHandler(async () => {
     newTimers: data.newTimers,
   }));
 
-  // Calculate growth rate (simplified - member growth percentage)
-  const lastMonthStart = new Date(startOfMonth);
-  lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
+  // Calculate growth rate (member growth percentage)
+  const membersLastMonthStart = new Date(startOfMonth);
+  membersLastMonthStart.setMonth(membersLastMonthStart.getMonth() - 1);
 
   const membersLastMonth = await prisma.member.count({
     where: {
       createdAt: {
-        gte: lastMonthStart,
+        gte: membersLastMonthStart,
         lt: startOfMonth,
       },
     },
@@ -110,24 +125,28 @@ export const GET = asyncHandler(async () => {
       ? ((membersThisMonth / membersLastMonth) * 100).toFixed(1)
       : "0.0";
 
+  // Calculate revenue change percentage
+  let revenueChange = "0%";
+  if (revenueLastMonth > 0) {
+    const changePercent =
+      ((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100;
+    revenueChange =
+      changePercent >= 0
+        ? `+${changePercent.toFixed(1)}%`
+        : `${changePercent.toFixed(1)}%`;
+  } else if (revenueThisMonth > 0) {
+    revenueChange = "+100%"; // If no revenue last month but has this month
+  }
+
   return NextResponse.json({
     success: true,
     data: {
       totalRevenue: totalRevenue.toFixed(2),
-      revenueChange:
-        revenueThisMonth > 0
-          ? "+" +
-            (
-              (revenueThisMonth /
-                Math.max(totalRevenue - revenueThisMonth, 1)) *
-              100
-            ).toFixed(1) +
-            "%"
-          : "0%",
+      revenueChange,
       totalMembers,
-      membersChange: membersThisMonth > 0 ? `+${membersThisMonth}` : "0",
+      membersChange: membersThisMonth.toString(),
       newTimers,
-      newTimersChange: newTimers > 0 ? `+${newTimers}` : "0",
+      newTimersChange: newTimers.toString(),
       growthRate: `${growthRate}%`,
       chartData,
     },

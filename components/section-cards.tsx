@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
   IconTrendingUp,
   IconUsers,
@@ -15,46 +14,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-type DashboardStats = {
-  totalRevenue: string;
-  revenueChange: string;
-  totalMembers: number;
-  membersChange: string;
-  newTimers: number;
-  newTimersChange: string;
-  growthRate: string;
-};
+import { useDashboardStats } from "@/hooks/use-dashboard-stats";
 
 export function SectionCards() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalRevenue: "0.00",
-    revenueChange: "0%",
-    totalMembers: 0,
-    membersChange: "0",
-    newTimers: 0,
-    newTimersChange: "0",
-    growthRate: "0.0%",
-  });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await fetch("/api/dashboard/stats");
-        const data = await response.json();
-        if (data.success && data.data) {
-          setStats(data.data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch dashboard stats:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []);
+  const {
+    data: stats,
+    isLoading: loading,
+    isError: error,
+  } = useDashboardStats();
 
   if (loading) {
     return (
@@ -71,6 +38,29 @@ export function SectionCards() {
     );
   }
 
+  if (error || !stats) {
+    return (
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i} className="border-destructive/50">
+            <CardHeader>
+              <CardDescription className="text-destructive text-xs">
+                Failed to load data
+              </CardDescription>
+              <CardTitle className="text-muted-foreground">--</CardTitle>
+            </CardHeader>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  // Format numbers with + prefix if positive
+  const formatChange = (value: string | number) => {
+    const numValue = typeof value === "string" ? parseFloat(value) : value;
+    return numValue > 0 ? `+${numValue}` : numValue.toString();
+  };
+
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
       {/* Total Revenue Card */}
@@ -81,7 +71,11 @@ export function SectionCards() {
             Total Revenue
           </CardDescription>
           <CardTitle className="text-4xl font-bold mt-2">
-            GHS {parseFloat(stats.totalRevenue).toLocaleString()}
+            GHS{" "}
+            {parseFloat(stats.totalRevenue).toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
           </CardTitle>
         </CardHeader>
         <CardFooter className="relative z-10 pt-4 border-t border-white/10">
@@ -117,7 +111,9 @@ export function SectionCards() {
                 <IconUsers className="size-4" />
               </div>
               <div>
-                <p className="text-sm font-semibold">+{stats.membersChange}</p>
+                <p className="text-sm font-semibold">
+                  {formatChange(stats.membersChange)}
+                </p>
                 <p className="text-xs text-purple-100">new this month</p>
               </div>
             </div>
@@ -133,7 +129,7 @@ export function SectionCards() {
             New Timers
           </CardDescription>
           <CardTitle className="text-4xl font-bold mt-2">
-            {stats.newTimers}
+            {stats.newTimers.toLocaleString()}
           </CardTitle>
         </CardHeader>
         <CardFooter className="relative z-10 pt-4 border-t border-amber-600/20">
@@ -144,7 +140,7 @@ export function SectionCards() {
               </div>
               <div>
                 <p className="text-sm font-semibold">
-                  +{stats.newTimersChange}
+                  {formatChange(stats.newTimersChange)}
                 </p>
                 <p className="text-xs text-amber-900">this month</p>
               </div>
