@@ -168,7 +168,7 @@ const EditMemberDialog = ({
 
               <label
                 htmlFor="edit-image"
-                className="cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-800 transition"
+                className="cursor-pointer text-sm font-medium text-primary hover:text-primary/80 transition"
               >
                 Upload Image
               </label>
@@ -282,7 +282,7 @@ const EditMemberDialog = ({
             </Button>
             <Button
               type="submit"
-              className="bg-primary-color hover:bg-blue-700 text-white"
+              className="bg-primary hover:bg-primary/80 text-white"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
