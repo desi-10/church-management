@@ -2,6 +2,8 @@ import axios from "axios";
 
 export interface DashboardStats {
   totalRevenue: string;
+  revenueThisMonth: string;
+  revenueLastMonth: string;
   revenueChange: string;
   totalMembers: number;
   membersChange: string;
@@ -38,4 +40,3 @@ export const dashboardService = {
     return data.data;
   },
 };
-
