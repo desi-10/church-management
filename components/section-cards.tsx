@@ -128,7 +128,7 @@ export function SectionCards() {
       </Card>
 
       {/* New Timers Card */}
-      <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-amber-400 to-amber-500 text-gray-900">
+      <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-amber-600 to-amber-800 text-gray-900 text-white">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full -mr-16 -mt-16" />
         <CardHeader className="relative z-10 pb-2">
           <CardDescription className="text-amber-900 text-xs font-medium uppercase tracking-wide">
@@ -148,7 +148,7 @@ export function SectionCards() {
                 <p className="text-sm font-semibold">
                   {formatChange(stats.newTimersChange)}
                 </p>
-                <p className="text-xs text-amber-900">this month</p>
+                <p className="text-xs text-white">this month</p>
               </div>
             </div>
           </div>
