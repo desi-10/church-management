@@ -8,6 +8,8 @@ import Link from "next/link";
 import { EditFinanceDialog } from "@/components/dialogs/finance/edit.finance";
 import { DeleteFinanceDialog } from "@/components/dialogs/finance/delete.finance";
 import { useState } from "react";
+import { formatPaymentType, formatStatus, formatType } from "@/utils/fomatter";
+import { dateFormatter } from "@/utils/fomatter";
 
 type FinanceTable = {
   id: string;
@@ -27,8 +29,7 @@ type FinanceTable = {
   firstname: string;
   lastname: string;
   approvedBy: {
-    firstName: string;
-    lastName: string;
+    name: string;
   };
   member: {
     firstName: string;
@@ -63,7 +64,14 @@ export const columns: ColumnDef<FinanceTable>[] = [
     id: "type",
     accessorKey: "type",
     header: "Type",
-    cell: ({ row }) => <div className="truncate w-44">{row.original.type}</div>,
+    cell: ({ row }) => (
+      <div className="truncate w-44 space-y-1 text-sm">
+        <p>{formatType(row.original.type)}</p>
+        <p className="text-xs text-gray-500 truncate">
+          {row.original.description || "----"}
+        </p>
+      </div>
+    ),
   },
 
   // {
@@ -75,11 +83,13 @@ export const columns: ColumnDef<FinanceTable>[] = [
   //   ),
   // },
   {
-    id: "currency",
-    accessorKey: "currency",
-    header: "Currency",
+    id: "amount",
+    accessorKey: "amount",
+    header: "Amount",
     cell: ({ row }) => (
-      <div className="truncate w-44">{row.original.currency}</div>
+      <div className="truncate w-44">
+        {row.original.currency} {row.original.amount}
+      </div>
     ),
   },
   {
@@ -87,7 +97,9 @@ export const columns: ColumnDef<FinanceTable>[] = [
     accessorKey: "paymentType",
     header: "Payment Type",
     cell: ({ row }) => (
-      <div className="truncate w-44">{row.original.paymentType}</div>
+      <div className="truncate w-44">
+        {formatPaymentType(row.original.paymentType)}
+      </div>
     ),
   },
   {
@@ -95,19 +107,21 @@ export const columns: ColumnDef<FinanceTable>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => (
-      <div className="truncate w-44">{row.original.status}</div>
+      <div className="truncate w-44">{formatStatus(row.original.status)}</div>
     ),
   },
   {
     id: "date",
     accessorKey: "date",
     header: "Date",
-    cell: ({ row }) => <div className="truncate w-44">{row.original.date}</div>,
+    cell: ({ row }) => (
+      <div className="truncate w-44">{dateFormatter(row.original.date)}</div>
+    ),
   },
   {
     id: "memberId",
     accessorKey: "memberId",
-    header: "Member ID",
+    header: "Member",
     cell: ({ row }) => (
       <div className="truncate w-44">
         {row.original.member?.firstName || "----"}{" "}
@@ -121,8 +135,17 @@ export const columns: ColumnDef<FinanceTable>[] = [
     header: "Approved By",
     cell: ({ row }) => (
       <div className="truncate w-44">
-        {row.original.approvedBy?.firstName || "----"}{" "}
-        {row.original.approvedBy?.lastName || "----"}
+        {row.original.approvedBy?.name || "----"}{" "}
+      </div>
+    ),
+  },
+  {
+    id: "member",
+    accessorKey: "member",
+    header: "Transaction Name",
+    cell: ({ row }) => (
+      <div className="truncate w-44">
+        {row.original.firstname || "----"} {row.original.lastname || "----"}
       </div>
     ),
   },
@@ -134,16 +157,7 @@ export const columns: ColumnDef<FinanceTable>[] = [
       <div className="truncate w-44">{row.original.reference || "----"}</div>
     ),
   },
-  {
-    id: "member",
-    accessorKey: "member",
-    header: "Not a member",
-    cell: ({ row }) => (
-      <div className="truncate w-44">
-        {row.original.firstname || "----"} {row.original.lastname || "----"}
-      </div>
-    ),
-  },
+
   {
     id: "actions",
     cell: ({ row }) => {
