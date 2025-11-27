@@ -149,6 +149,9 @@ export const GET = asyncHandler(async () => {
       newTimersChange: newTimers.toString(),
       growthRate: `${growthRate}%`,
       chartData,
+
+      revenueThisMonth: revenueThisMonth.toFixed(2),
+      revenueLastMonth: revenueLastMonth.toFixed(2),
     },
   });
 });

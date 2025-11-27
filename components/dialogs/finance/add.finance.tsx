@@ -258,7 +258,15 @@ const AddFinance = () => {
 
           <div className="grid gap-2">
             <Label htmlFor="notes">Notes (Optional)</Label>
-            {/* <Textarea placeholder="Notes" {...register("notes")} /> */}
+            <textarea
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="Notes"
+              {...register("notes")}
+              rows={3}
+            />
+            {errors.notes && (
+              <p className="text-sm text-red-500">{errors.notes.message}</p>
+            )}
           </div>
 
           <DialogFooter>
@@ -272,7 +280,7 @@ const AddFinance = () => {
               ) : (
                 <Plus className="h-4 w-4 mr-1" />
               )}
-              {isSubmitting ? "Adding..." : "Add Transaction"}
+              {isSubmitting ? "Adding..." : "Add Finance"}
             </Button>
           </DialogFooter>
         </form>

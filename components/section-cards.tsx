@@ -72,7 +72,7 @@ export function SectionCards() {
           </CardDescription>
           <CardTitle className="text-4xl font-bold mt-2">
             GHS{" "}
-            {parseFloat(stats.totalRevenue).toLocaleString("en-US", {
+            {parseFloat(stats.revenueThisMonth).toLocaleString("en-US", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}
@@ -85,7 +85,13 @@ export function SectionCards() {
                 <IconTrendingUp className="size-4" />
               </div>
               <div>
-                <p className="text-sm font-semibold">{stats.revenueChange}</p>
+                <p className="text-sm font-semibold">
+                  GHS{" "}
+                  {parseFloat(stats.revenueThisMonth).toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
                 <p className="text-xs text-blue-100">vs last month</p>
               </div>
             </div>
