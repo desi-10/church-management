@@ -22,9 +22,8 @@ export interface Finance {
   firstname?: string;
   lastname?: string;
   approvedBy?: {
-    firstName: string;
-    lastName: string;
-  };
+    name: string | null;
+  } | null;
   createdAt: string;
   updatedAt: string;
   [key: string]: unknown;
@@ -102,4 +101,3 @@ export const financeService = {
     return data;
   },
 };
-

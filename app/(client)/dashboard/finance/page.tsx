@@ -7,6 +7,13 @@ import { Pagination } from "@/components/pagination";
 import { ExportButtons } from "@/components/export-buttons";
 import { useFinances } from "@/hooks/use-finances";
 import { useState } from "react";
+import {
+  dateFormatter,
+  formatCurrency,
+  formatPaymentType,
+  formatStatus,
+  formatType,
+} from "@/utils/fomatter";
 
 const FinancePage = () => {
   const [page, setPage] = useState(1);
@@ -26,20 +33,16 @@ const FinancePage = () => {
           <ExportButtons
             data={
               (finances?.finances || []).map((f) => ({
-                date: f.date,
-                amount: f.amount,
-                type: f.type,
-                category: f.category,
+                date: dateFormatter(f.date),
+                amount: f.currency + " " + f.amount,
+                type: formatType(f.type),
                 member: f.member
                   ? `${f.member.firstName} ${f.member.lastName}`
                   : "",
                 reference: f.reference || "",
-                status: f.status,
-                paymentType: f.paymentType || "",
-                currency: f.currency,
-                reconciled: String(f.reconciled),
-                receiptUrl: f.receiptUrl || "",
-                fund: f.fund || "",
+                status: formatStatus(f.status),
+                paymentType: formatPaymentType(f.paymentType || ""),
+                approvedBy: f.approvedBy?.name || "",
               })) as Record<string, unknown>[]
             }
             fileName="finances"
@@ -48,15 +51,11 @@ const FinancePage = () => {
               { header: "Date", dataKey: "date" },
               { header: "Amount", dataKey: "amount" },
               { header: "Type", dataKey: "type" },
-              { header: "Category", dataKey: "category" },
               { header: "Member", dataKey: "member" },
               { header: "Reference", dataKey: "reference" },
               { header: "Status", dataKey: "status" },
               { header: "Payment Type", dataKey: "paymentType" },
-              { header: "Currency", dataKey: "currency" },
-              { header: "Reconciled", dataKey: "reconciled" },
-              { header: "Receipt", dataKey: "receiptUrl" },
-              { header: "Fund", dataKey: "fund" },
+              { header: "Approved By", dataKey: "approvedBy" },
             ]}
           />
           <AddFinance />
